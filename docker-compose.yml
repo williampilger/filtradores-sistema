@@ -1,0 +1,16 @@
+# Infra local (dev e sony).
+# ⚠️ O banco MySQL NÃO está aqui: usa o container compartilhado `mysql-dev` (ver docs/deploy.md).
+# Porta deslocada (6393) para não conflitar com os Redis de outros projetos.
+# Bind em 127.0.0.1: o Docker ignora o ufw, então nunca publicar em 0.0.0.0.
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: filt-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6393:6379"
+    volumes:
+      - filt-redis:/data
+
+volumes:
+  filt-redis:

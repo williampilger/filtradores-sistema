@@ -1,0 +1,117 @@
+/*
+ * Authenty AE - Bom Princípio-RS  |  github.com/authentyAE
+ * by: will.i.am                   |  github.com/williampilger
+ *
+ * 2026.11.15 - Tema - identidade visual da ACEF Filtradores (ver docs/identidade-visual.md)
+ *
+ * ⚠️ ATENÇÃO: NÃO usar cores, em momento ALGUM, que não estejam nesta paleta.
+ *    Se for necessário, criar novas cores AQUI, com nome coerente que remeta à função.
+ *    Uso no Tailwind: bg-surface, text-ink-muted, border-line, bg-brand, text-club-red...
+ */
+@import "tailwindcss";
+
+@theme {
+    --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-display: var(--font-oswald), "Oswald", "Bebas Neue", Impact, "Arial Narrow", sans-serif;
+    --font-mono: ui-monospace, "JetBrains Mono", "Cascadia Mono", Menlo, monospace;
+
+    /* Marca - azul royal (cor dominante das artes do clube) */
+    --color-brand: #1b3fd1;
+    --color-brand-strong: #102c9e;
+    --color-brand-deep: #0a1c66;
+    --color-brand-soft: #e6ebfc;
+    --color-brand-ink: #ffffff;
+    /* Escudo / uniforme */
+    --color-club-red: #d62631;        /* listras do uniforme, "à venda!" */
+    --color-club-red-deep: #8f1d22;   /* contorno do escudo */
+    --color-club-gold: #f5b700;       /* faixa "ACEF", raios do escudo */
+    --color-club-orange: #e8891b;
+    --color-brand-accent: #f5b700;
+
+    /* Superfícies */
+    --color-app: #f2f4fa;
+    --color-surface: #ffffff;
+    --color-surface-alt: #f6f8fb;
+    --color-surface-hover: #eaf1fb;
+    --color-header: #0a1c66;
+    --color-header-ink: #ffffff;
+    --color-sidebar: #102c9e;
+    --color-sidebar-ink: #d3dcfa;
+    --color-sidebar-active: #f5b700;
+
+    /* Linhas */
+    --color-line: #d9dee7;
+    --color-line-strong: #b6c0ce;
+
+    /* Texto */
+    --color-ink: #17202e;
+    --color-ink-muted: #5b6878;
+    --color-ink-faint: #93a0ae;
+    --color-ink-inverse: #ffffff;
+
+    /* Estados */
+    --color-ok: #1e9e5a;
+    --color-ok-soft: #e2f5ea;
+    --color-warn: #c98a00;
+    --color-warn-soft: #fff4d6;
+    --color-danger: #d13b3b;
+    --color-danger-soft: #fde6e6;
+    --color-info: #6b5bd2;
+    --color-info-soft: #ece9fb;
+
+    --spacing-header: 52px;
+    --spacing-menu: 220px;
+}
+
+html, body { min-height: 100%; }
+
+body {
+    background: var(--color-app);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+}
+
+.num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+
+.inp {
+    height: 34px; padding: 0 10px; border: 1px solid var(--color-line); border-radius: 6px;
+    background: var(--color-surface); font-size: 14px; outline: none; min-width: 0; width: 100%;
+}
+textarea.inp { height: auto; padding: 8px 10px; }
+select.inp { padding-right: 4px; }
+.inp:focus { border-color: var(--color-brand); box-shadow: 0 0 0 3px var(--color-brand-soft); }
+.inp:disabled { background: var(--color-surface-alt); color: var(--color-ink-muted); }
+
+.btn {
+    height: 34px; padding: 0 14px; border: 1px solid var(--color-line-strong); border-radius: 6px; background: var(--color-surface);
+    font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; cursor: pointer; user-select: none;
+}
+.btn:hover:not(:disabled) { background: var(--color-surface-hover); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn-primary { background: var(--color-brand); border-color: var(--color-brand-strong); color: var(--color-brand-ink); }
+.btn-primary:hover:not(:disabled) { background: var(--color-brand-strong); }
+.btn-danger { color: var(--color-danger); border-color: var(--color-danger); }
+.btn-danger:hover:not(:disabled) { background: var(--color-danger-soft); }
+.btn-ghost { border-color: transparent; background: transparent; }
+.btn-sm { height: 28px; padding: 0 10px; font-size: 13px; }
+.btn-lg { height: 44px; padding: 0 20px; font-size: 16px; }
+
+.lbl { display: block; font-size: 12px; color: var(--color-ink-muted); margin-bottom: 3px; font-weight: 500; }
+
+.panel { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 10px; }
+
+.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.tbl th { text-align: left; font-weight: 600; color: var(--color-ink-muted); background: var(--color-surface-alt); padding: 8px 10px; border-bottom: 1px solid var(--color-line); white-space: nowrap; }
+.tbl td { padding: 8px 10px; border-bottom: 1px solid var(--color-line); vertical-align: middle; }
+.tbl tr:hover td { background: var(--color-surface-hover); }
+
+/* Títulos no estilo das artes do clube: condensado, pesado, itálico, caixa alta */
+.display { font-family: var(--font-display); font-weight: 700; font-style: italic; text-transform: uppercase; letter-spacing: .01em; line-height: 1.02; }
+/* Faixa diagonal azul/branco/vermelho (listras do uniforme) */
+.club-stripes { background: linear-gradient(115deg, var(--color-brand) 0 62%, var(--color-surface) 62% 66%, var(--color-club-red) 66% 72%, var(--color-surface) 72% 75%, var(--color-brand-strong) 75%); }
+.hero-blue { background: radial-gradient(120% 140% at 85% 0%, var(--color-brand) 0%, var(--color-brand-strong) 55%, var(--color-brand-deep) 100%); color: var(--color-brand-ink); }
+.btn-accent { background: var(--color-club-gold); border-color: var(--color-club-gold); color: var(--color-brand-deep); font-weight: 700; }
+.btn-red { background: var(--color-club-red); border-color: var(--color-club-red); color: var(--color-ink-inverse); font-weight: 600; }

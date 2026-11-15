@@ -1,0 +1,37 @@
+# Dependências / builds
+node_modules/
+.next/
+dist/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# Prisma (client gerado)
+packages/db/src/generated/
+
+# Expo
+apps/mobile/.expo/
+apps/mobile/ios/
+apps/mobile/android/
+apps/mobile/web-build/
+
+# Arquivos enviados (storage local)
+.storage/
+
+# Segredos - NUNCA commitar
+.env
+.env.*
+!.env.sample
+secrets/
+*.pfx
+*.p12
+*.pem
+*.jks
+*.keystore
+
+# Sistema / editor
+.DS_Store
+*.log
+.vscode/*
+!.vscode/settings.json
+coverage/

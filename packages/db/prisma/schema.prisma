@@ -1,0 +1,1033 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Filtradores - Esquema do banco de dados (MySQL 8 - container `mysql-dev`)
+// by: will.i.am | github.com/williampilger | 2026.11.15
+//
+// CONVENÇÕES:
+// - Modelos em PascalCase, campos em camelCase, TABELAS em snake_case (@@map).
+// - Relações em PascalCase (User, Event, Items...), FKs em camelCase (userId, eventId...).
+// - `onDelete` SEMPRE explícito. `@@index` em toda FK.
+// - Soft delete via `deletedAt` (null = ativo) nos cadastros de negócio.
+// - Dinheiro: Int em CENTAVOS (BRL). Nunca float.
+//
+// PREFIXOS DE VARIÁVEIS:
+// - ref_  : valor de referência, salvo para retenção do estado da época (snapshot).
+// - calc_ : valor calculado a partir de outros valores (denormalizado para performance).
+//
+// ⚠️ Enums espelhados em packages/shared/src/enums.ts (o app mobile não importa o Prisma).
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENUMS
+// ═════════════════════════════════════════════════════════════════════════════
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum TempHashOperation {
+  EMAIL_CONFIRMATION
+  PASSWORD_RESET
+  INVITE // usuário criado pela diretoria define a própria senha
+}
+
+enum PermissionEffect {
+  GRANT
+  DENY
+}
+
+enum BillingPeriod {
+  MONTHLY
+  QUARTERLY
+  SEMIANNUAL
+  YEARLY
+}
+
+/// Como o sócio entra nos jogos
+enum MemberEventAccess {
+  NONE      // sem benefício de entrada
+  CLAIM     // resgata um ingresso no app (limitado à capacidade)
+  AUTOMATIC // a carteirinha válida já é a entrada
+}
+
+enum MembershipStatus {
+  PENDING  // aguardando o 1º pagamento
+  ACTIVE
+  OVERDUE  // inadimplente (passou da carência) - não entra nos jogos
+  CANCELED
+  EXPIRED
+}
+
+enum MembershipChargeStatus {
+  OPEN
+  PAID
+  CANCELED
+  OVERDUE
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  CANCELED
+}
+
+enum TicketStatus {
+  VALID
+  USED
+  CANCELED
+  REFUNDED
+}
+
+enum TicketOrigin {
+  SALE
+  COURTESY
+  MEMBER_CLAIM
+  MANUAL // vendido na portaria / PDV
+}
+
+enum CheckInResult {
+  OK
+  ALREADY_USED
+  INVALID
+  WRONG_EVENT
+  CANCELED
+  MEMBER_INACTIVE
+  NOT_ELIGIBLE
+  EXPIRED_CODE
+  CAPACITY_FULL
+}
+
+enum FulfillmentMode {
+  STOCK     // pronta entrega
+  ON_DEMAND // sob encomenda (lotes de produção)
+}
+
+enum WaitlistPayment {
+  UPFRONT    // paga ao entrar (pré-venda)
+  ON_RELEASE // paga quando o lote ficar pronto / estoque chegar
+}
+
+enum ProductionBatchStatus {
+  OPEN
+  CLOSED
+  IN_PRODUCTION
+  READY
+  DELIVERED
+  CANCELED
+}
+
+enum WaitlistStatus {
+  WAITING
+  NOTIFIED  // chamado: tem `reservationExpiresAt` para comprar
+  CONVERTED // comprou
+  EXPIRED
+  CANCELED
+}
+
+enum OrderChannel {
+  WEB
+  APP
+  POS
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  CANCELED
+  EXPIRED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum OrderItemKind {
+  TICKET
+  PRODUCT
+  MEMBERSHIP // cobrança de sócio (adesão/renovação)
+  PREORDER   // encomenda (ON_DEMAND) vinculada a um lote de produção
+}
+
+enum DeliveryStatus {
+  NOT_APPLICABLE
+  PENDING
+  IN_PRODUCTION
+  READY_FOR_PICKUP
+  DELIVERED
+  CANCELED
+}
+
+enum PaymentMethod {
+  PIX
+  CARD
+  BOLETO
+  CHECKOUT
+  CASH
+  MANUAL
+  COURTESY
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  PAID
+  FAILED
+  CANCELED
+  EXPIRED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  CHARGEBACK
+}
+
+enum PostVisibility {
+  PUBLIC
+  MEMBERS
+  MIN_TIER
+}
+
+enum PlayerPosition {
+  GK
+  DF
+  MF
+  FW
+  STAFF
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// CLUBE
+// ═════════════════════════════════════════════════════════════════════════════
+
+/// Linha única (id = 1)
+model ClubSettings {
+  id             Int      @id @default(1)
+  name           String   @default("ACE Filtradores") @db.VarChar(120)
+  shortName      String   @default("ACEF") @db.VarChar(40)
+  city           String?  @db.VarChar(120)
+  about          String?  @db.Text
+  logoKey        String?  @db.VarChar(255)
+  primaryColor   String   @default("#1b3fd1") @db.VarChar(9) // azul royal (docs/identidade-visual.md)
+  secondaryColor String   @default("#d62631") @db.VarChar(9) // vermelho do uniforme
+  contactEmail   String?  @db.VarChar(160)
+  contactPhone   String?  @db.VarChar(30)
+  instagram      String?  @db.VarChar(80)
+  pickupInfo     String?  @db.Text // onde/como retirar produtos da loja
+  termsText      String?  @db.Text
+  updatedAt      DateTime @updatedAt
+
+  @@map("club_settings")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// USUÁRIOS, SESSÕES, PERMISSÕES
+// ═════════════════════════════════════════════════════════════════════════════
+
+model User {
+  id              Int        @id @default(autoincrement())
+  name            String     @db.VarChar(160)
+  email           String     @unique @db.VarChar(160)
+  emailVerifiedAt DateTime?
+  cpf             String?    @unique @db.Char(11)
+  phone           String?    @db.VarChar(20)
+  birthDate       DateTime?  @db.Date
+  photoKey        String?    @db.VarChar(255)
+  passwordHash    String?    @db.VarChar(255) // null = convite ainda não aceito
+  isMaster        Boolean    @default(false)
+  status          UserStatus @default(ACTIVE)
+  totpSecretEnc   Bytes?     @db.Blob
+  totpEnabledAt   DateTime?
+  lastLoginAt     DateTime?
+  createdById     Int?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+
+  Sessions          UserSession[]
+  TempHashes        TempHash[]
+  RecoveryCodes     RecoveryCode[]
+  Roles             UserRole[]
+  Overrides         UserPermissionOverride[]
+  EventStaff        EventStaff[]
+  Membership        Membership?
+  Orders            Order[]                  @relation("OrderCustomer")
+  OrdersCreated     Order[]                  @relation("OrderCreatedBy")
+  Tickets           Ticket[]                 @relation("TicketOwner")
+  TicketsIssued     Ticket[]                 @relation("TicketIssuer")
+  CheckIns          CheckIn[]
+  WaitlistEntries   WaitlistEntry[]
+  Posts             Post[]
+  AuditLogs         AuditLog[]
+  Notifications     Notification[]
+  PaymentsRegistered Payment[]
+  Refunds           Refund[]
+  StockMovements    StockMovement[]
+
+  @@index([name])
+  @@map("users")
+}
+
+model UserSession {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  tokenHash  String    @unique @db.Char(64)
+  /// login com senha OK, mas falta o 2FA (ou o cadastro obrigatório do 2FA)
+  mfaPending Boolean   @default(false)
+  client     String    @default("web") @db.VarChar(16) // web | app
+  ip         String?   @db.VarChar(64)
+  userAgent  String?   @db.VarChar(500)
+  lastSeenAt DateTime  @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_sessions")
+}
+
+model TempHash {
+  id        Int               @id @default(autoincrement())
+  userId    Int
+  operation TempHashOperation
+  hash      String            @unique @db.Char(64) // sha256 do token enviado por e-mail
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime          @default(now())
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("temp_hashes")
+}
+
+/// Códigos de recuperação do 2FA (uso único, hash argon2)
+model RecoveryCode {
+  id       Int       @id @default(autoincrement())
+  userId   Int
+  codeHash String    @db.VarChar(255)
+  usedAt   DateTime?
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("recovery_codes")
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  key         String?  @unique @db.VarChar(40) // papéis semeados (it_admin, board...). null = criado no painel
+  name        String   @unique @db.VarChar(80)
+  description String?  @db.VarChar(255)
+  require2fa  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  Permissions RolePermission[]
+  Users       UserRole[]
+
+  @@map("roles")
+}
+
+model RolePermission {
+  roleId     Int
+  permission String @db.VarChar(64) // chave do catálogo (packages/shared/src/permissions.ts)
+
+  Role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permission])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  userId Int
+  roleId Int
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+model UserPermissionOverride {
+  userId     Int
+  permission String           @db.VarChar(64)
+  effect     PermissionEffect
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, permission])
+  @@map("user_permission_overrides")
+}
+
+/// Se o usuário tiver QUALQUER linha aqui, as permissões de evento (EVENT_SCOPED_PERMISSIONS)
+/// valem apenas para os eventos listados.
+model EventStaff {
+  eventId Int
+  userId  Int
+
+  Event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  User  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, userId])
+  @@index([userId])
+  @@map("event_staff")
+}
+
+model AuditLog {
+  id        BigInt   @id @default(autoincrement())
+  userId    Int?
+  action    String   @db.VarChar(64) // ex.: ticket.courtesy, payment.manual, role.update
+  entity    String?  @db.VarChar(48)
+  entityId  String?  @db.VarChar(48)
+  data      Json?
+  ip        String?  @db.VarChar(64)
+  createdAt DateTime @default(now())
+
+  User User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+/// Notificações in-app (o e-mail é paralelo; push fica no ToDo)
+model Notification {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  title     String    @db.VarChar(160)
+  body      String?   @db.Text
+  link      String?   @db.VarChar(255)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// SÓCIOS
+// ═════════════════════════════════════════════════════════════════════════════
+
+model MembershipPlan {
+  id                 Int               @id @default(autoincrement())
+  name               String            @db.VarChar(80)
+  slug               String            @unique @db.VarChar(80)
+  description        String?           @db.Text
+  /// nível para o feed "prime" e comparações (maior = mais benefícios)
+  tierLevel          Int               @default(1)
+  priceCents         Int
+  period             BillingPeriod     @default(MONTHLY)
+  enrollmentFeeCents Int               @default(0)
+  storeDiscountPct   Int               @default(0)
+  ticketDiscountPct  Int               @default(0)
+  eventAccess        MemberEventAccess @default(NONE)
+  benefits           Json? // string[]
+  color              String?           @db.VarChar(9)
+  active             Boolean           @default(true)
+  sortOrder          Int               @default(0)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  deletedAt          DateTime?
+
+  Memberships    Membership[]
+  Charges        MembershipCharge[]
+  EligibleEvents EventEligiblePlan[]
+
+  @@map("membership_plans")
+}
+
+/// Um vínculo por usuário (trocar de plano = alterar planId)
+model Membership {
+  id                 Int              @id @default(autoincrement())
+  userId             Int              @unique
+  planId             Int
+  memberNumber       Int?             @unique // atribuído na 1ª ativação
+  status             MembershipStatus @default(PENDING)
+  startedAt          DateTime?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  canceledAt         DateTime?
+  cancelReason       String?          @db.VarChar(255)
+  /// incrementar invalida o QR da carteirinha (celular perdido)
+  qrVersion          Int              @default(1)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  User         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Plan         MembershipPlan     @relation(fields: [planId], references: [id], onDelete: Restrict)
+  Charges      MembershipCharge[]
+  Tickets      Ticket[]
+  CheckIns     CheckIn[]
+  EventEntries MemberEventEntry[]
+
+  @@index([planId])
+  @@index([status, currentPeriodEnd])
+  @@map("memberships")
+}
+
+model MembershipCharge {
+  id           Int                    @id @default(autoincrement())
+  membershipId Int
+  planId       Int
+  periodStart  DateTime?
+  periodEnd    DateTime?
+  amountCents  Int
+  dueDate      DateTime
+  status       MembershipChargeStatus @default(OPEN)
+  isEnrollment Boolean                @default(false)
+  paidAt       DateTime?
+  createdAt    DateTime               @default(now())
+
+  Membership Membership     @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  Plan       MembershipPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+  OrderItems OrderItem[]
+
+  @@index([membershipId])
+  @@index([planId])
+  @@index([status, dueDate])
+  @@map("membership_charges")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// EVENTOS / INGRESSOS / ENTRADA
+// ═════════════════════════════════════════════════════════════════════════════
+
+model Event {
+  id                Int         @id @default(autoincrement())
+  slug              String      @unique @db.VarChar(100)
+  title             String      @db.VarChar(160)
+  description       String?     @db.Text
+  isMatch           Boolean     @default(true)
+  opponent          String?     @db.VarChar(120)
+  competition       String?     @db.VarChar(120)
+  venue             String?     @db.VarChar(160)
+  address           String?     @db.VarChar(255)
+  startsAt          DateTime
+  endsAt            DateTime?
+  gatesOpenAt       DateTime?
+  /// capacidade total (ingressos + entradas de sócios). null = sem limite
+  capacity          Int?
+  /// entradas de sócio habilitadas neste evento (respeitando o eventAccess do plano)
+  memberAccess      Boolean     @default(true)
+  /// limite de entradas/resgates de sócios (null = limitado só pela capacidade)
+  memberCapacity    Int?
+  status            EventStatus @default(DRAFT)
+  coverKey          String?     @db.VarChar(255)
+  homeScore         Int?
+  awayScore         Int?
+  calc_memberClaims Int         @default(0)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  deletedAt         DateTime?
+
+  TicketTypes   TicketType[]
+  Tickets       Ticket[]
+  CheckIns      CheckIn[]
+  Staff         EventStaff[]
+  EligiblePlans EventEligiblePlan[]
+  MemberEntries MemberEventEntry[]
+  Lineup        Lineup?
+  Posts         Post[]
+  OrderItems    OrderItem[]
+
+  @@index([status, startsAt])
+  @@map("events")
+}
+
+/// Sem linhas = todos os planos com eventAccess != NONE
+model EventEligiblePlan {
+  eventId Int
+  planId  Int
+
+  Event Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  Plan  MembershipPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, planId])
+  @@index([planId])
+  @@map("event_eligible_plans")
+}
+
+/// Lote de ingresso
+model TicketType {
+  id             Int       @id @default(autoincrement())
+  eventId        Int
+  name           String    @db.VarChar(80)
+  description    String?   @db.VarChar(255)
+  priceCents     Int
+  quantity       Int
+  /// reservados (pedidos pendentes) + vendidos
+  calc_allocated Int       @default(0)
+  maxPerOrder    Int       @default(10)
+  salesStartAt   DateTime?
+  salesEndAt     DateTime?
+  membersOnly    Boolean   @default(false)
+  /// aplica o ticketDiscountPct do plano do sócio
+  memberDiscount Boolean   @default(true)
+  active         Boolean   @default(true)
+  sortOrder      Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  Event      Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  Tickets    Ticket[]
+  OrderItems OrderItem[]
+
+  @@index([eventId])
+  @@map("ticket_types")
+}
+
+model Ticket {
+  id             Int          @id @default(autoincrement())
+  code           String       @unique @db.VarChar(32)
+  eventId        Int
+  ticketTypeId   Int?
+  orderItemId    Int?
+  userId         Int?
+  membershipId   Int?
+  holderName     String       @db.VarChar(160)
+  holderCpf      String?      @db.Char(11)
+  origin         TicketOrigin
+  status         TicketStatus @default(VALID)
+  courtesyReason String?      @db.VarChar(255)
+  issuedById     Int?
+  usedAt         DateTime?
+  canceledAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  Event      Event       @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  TicketType TicketType? @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+  OrderItem  OrderItem?  @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+  User       User?       @relation("TicketOwner", fields: [userId], references: [id], onDelete: SetNull)
+  IssuedBy   User?       @relation("TicketIssuer", fields: [issuedById], references: [id], onDelete: SetNull)
+  Membership Membership? @relation(fields: [membershipId], references: [id], onDelete: SetNull)
+  CheckIns   CheckIn[]
+
+  @@index([eventId, status])
+  @@index([ticketTypeId])
+  @@index([orderItemId])
+  @@index([userId])
+  @@index([membershipId])
+  @@index([issuedById])
+  @@map("tickets")
+}
+
+/// Garante UMA entrada por sócio por evento (PK composta = atômico entre leitores)
+model MemberEventEntry {
+  eventId      Int
+  membershipId Int
+  createdAt    DateTime @default(now())
+
+  Event      Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  Membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, membershipId])
+  @@index([membershipId])
+  @@map("member_event_entries")
+}
+
+/// Log de TODAS as leituras (inclusive negadas)
+model CheckIn {
+  id           BigInt        @id @default(autoincrement())
+  eventId      Int
+  ticketId     Int?
+  membershipId Int?
+  operatorId   Int
+  result       CheckInResult
+  rawCode      String?       @db.VarChar(160)
+  deviceId     String?       @db.VarChar(64)
+  createdAt    DateTime      @default(now())
+
+  Event      Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  Ticket     Ticket?     @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+  Membership Membership? @relation(fields: [membershipId], references: [id], onDelete: SetNull)
+  Operator   User        @relation(fields: [operatorId], references: [id], onDelete: Restrict)
+
+  @@index([eventId, createdAt])
+  @@index([ticketId])
+  @@index([membershipId])
+  @@index([operatorId])
+  @@map("check_ins")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// LOJA
+// ═════════════════════════════════════════════════════════════════════════════
+
+model Product {
+  id                  Int             @id @default(autoincrement())
+  slug                String          @unique @db.VarChar(100)
+  name                String          @db.VarChar(160)
+  description         String?         @db.Text
+  category            String?         @db.VarChar(60)
+  imageKeys           Json? // string[]
+  basePriceCents      Int
+  fulfillment         FulfillmentMode @default(STOCK)
+  /// STOCK: fila "avise-me / reserva" quando esgotar | ON_DEMAND: encomendas em lotes
+  waitlistEnabled     Boolean         @default(false)
+  waitlistPayment     WaitlistPayment @default(UPFRONT)
+  allowMemberDiscount Boolean         @default(true)
+  maxPerOrder         Int             @default(10)
+  active              Boolean         @default(true)
+  sortOrder           Int             @default(0)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  deletedAt           DateTime?
+
+  Variants        ProductVariant[]
+  Batches         ProductionBatch[]
+  WaitlistEntries WaitlistEntry[]
+  OrderItems      OrderItem[]
+
+  @@index([active, sortOrder])
+  @@map("products")
+}
+
+model ProductVariant {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  sku        String?  @unique @db.VarChar(60)
+  name       String   @db.VarChar(80) // ex.: "M", "GG / Azul"
+  priceCents Int? // null = basePriceCents do produto
+  /// em mãos (ON_DEMAND: não usado)
+  stock      Int      @default(0)
+  /// reservado para pedidos pendentes e chamadas da lista de espera
+  reserved   Int      @default(0)
+  active     Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  Product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  StockMovements  StockMovement[]
+  WaitlistEntries WaitlistEntry[]
+  OrderItems      OrderItem[]
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model StockMovement {
+  id        Int      @id @default(autoincrement())
+  variantId Int
+  delta     Int
+  reason    String   @db.VarChar(24) // RESTOCK | ADJUST | SALE | RETURN | CANCEL
+  note      String?  @db.VarChar(255)
+  userId    Int?
+  orderId   Int?
+  createdAt DateTime @default(now())
+
+  Variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  User    User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([variantId])
+  @@index([userId])
+  @@map("stock_movements")
+}
+
+/// Lote de produção de item sob encomenda
+model ProductionBatch {
+  id          Int                   @id @default(autoincrement())
+  productId   Int
+  name        String                @db.VarChar(80)
+  minQuantity Int? // mínimo para produzir (informativo)
+  closesAt    DateTime? // prazo para encomendar
+  status      ProductionBatchStatus @default(OPEN)
+  notes       String?               @db.Text
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  Product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  WaitlistEntries WaitlistEntry[]
+  OrderItems      OrderItem[]
+
+  @@index([productId, status])
+  @@map("production_batches")
+}
+
+model WaitlistEntry {
+  id                   Int            @id @default(autoincrement())
+  productId            Int
+  variantId            Int
+  userId               Int
+  quantity             Int            @default(1)
+  status               WaitlistStatus @default(WAITING)
+  batchId              Int?
+  notifiedAt           DateTime?
+  reservationExpiresAt DateTime?
+  /// quantidade efetivamente reservada no estoque durante a chamada (STOCK)
+  reservedQty          Int            @default(0)
+  orderId              Int?
+  note                 String?        @db.VarChar(255)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  Product    Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  Variant    ProductVariant   @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  User       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Batch      ProductionBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  OrderItems OrderItem[]
+
+  @@index([variantId, status, createdAt])
+  @@index([productId])
+  @@index([userId])
+  @@index([batchId])
+  @@map("waitlist_entries")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// PEDIDOS / PAGAMENTOS
+// ═════════════════════════════════════════════════════════════════════════════
+
+model Order {
+  id             Int          @id @default(autoincrement())
+  code           String       @unique @db.VarChar(12) // legível (ex.: "F7K2M9QX")
+  userId         Int?
+  channel        OrderChannel @default(WEB)
+  status         OrderStatus  @default(PENDING_PAYMENT)
+  subtotalCents  Int
+  discountCents  Int          @default(0)
+  totalCents     Int
+  customerName   String       @db.VarChar(160)
+  customerEmail  String?      @db.VarChar(160)
+  customerCpf    String?      @db.Char(11)
+  customerPhone  String?      @db.VarChar(20)
+  /// reserva de estoque/ingressos até esta data (pedido pendente)
+  expiresAt      DateTime?
+  paidAt         DateTime?
+  canceledAt     DateTime?
+  refundedCents  Int          @default(0)
+  notes          String?      @db.VarChar(500)
+  createdById    Int? // operador (PDV, cortesia)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  User      User?       @relation("OrderCustomer", fields: [userId], references: [id], onDelete: SetNull)
+  CreatedBy User?       @relation("OrderCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  Items     OrderItem[]
+  Payments  Payment[]
+
+  @@index([userId])
+  @@index([createdById])
+  @@index([status, expiresAt])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                 Int            @id @default(autoincrement())
+  orderId            Int
+  kind               OrderItemKind
+  eventId            Int?
+  ticketTypeId       Int?
+  productId          Int?
+  variantId          Int?
+  batchId            Int?
+  waitlistEntryId    Int?
+  membershipChargeId Int?
+  quantity           Int
+  unitPriceCents     Int
+  discountCents      Int            @default(0)
+  totalCents         Int
+  ref_name           String         @db.VarChar(200)
+  /// nomes dos titulares dos ingressos (string[])
+  holderNames        Json?
+  deliveryStatus     DeliveryStatus @default(NOT_APPLICABLE)
+  deliveredAt        DateTime?
+  deliveredById      Int?
+
+  Order            Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  Event            Event?            @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  TicketType       TicketType?       @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+  Product          Product?          @relation(fields: [productId], references: [id], onDelete: Restrict)
+  Variant          ProductVariant?   @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  Batch            ProductionBatch?  @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  WaitlistEntry    WaitlistEntry?    @relation(fields: [waitlistEntryId], references: [id], onDelete: SetNull)
+  MembershipCharge MembershipCharge? @relation(fields: [membershipChargeId], references: [id], onDelete: Restrict)
+  Tickets          Ticket[]
+
+  @@index([orderId])
+  @@index([eventId])
+  @@index([ticketTypeId])
+  @@index([productId])
+  @@index([variantId])
+  @@index([batchId])
+  @@index([waitlistEntryId])
+  @@index([membershipChargeId])
+  @@index([deliveryStatus])
+  @@map("order_items")
+}
+
+model Payment {
+  id             Int           @id @default(autoincrement())
+  orderId        Int
+  gateway        String        @db.VarChar(32)
+  method         PaymentMethod
+  amountCents    Int
+  status         PaymentStatus @default(PENDING)
+  externalId     String?       @db.VarChar(128)
+  idempotencyKey String        @unique @db.VarChar(64)
+  checkoutUrl    String?       @db.Text
+  pixCopiaECola  String?       @db.Text
+  pixQrBase64    String?       @db.MediumText
+  boletoUrl      String?       @db.Text
+  expiresAt      DateTime?
+  paidAt         DateTime?
+  refundedCents  Int           @default(0)
+  /// pagamento manual / cortesia: quem registrou e observação/motivo
+  registeredById Int?
+  note           String?       @db.VarChar(500)
+  rawLast        Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  Order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  RegisteredBy User?   @relation(fields: [registeredById], references: [id], onDelete: SetNull)
+  Refunds      Refund[]
+
+  @@unique([gateway, externalId])
+  @@index([orderId])
+  @@index([registeredById])
+  @@index([status, createdAt])
+  @@map("payments")
+}
+
+model PaymentWebhookEvent {
+  id          BigInt    @id @default(autoincrement())
+  gateway     String    @db.VarChar(32)
+  eventId     String    @db.VarChar(160)
+  externalId  String?   @db.VarChar(128)
+  payload     Json
+  processedAt DateTime?
+  error       String?   @db.Text
+  createdAt   DateTime  @default(now())
+
+  @@unique([gateway, eventId])
+  @@index([processedAt])
+  @@map("payment_webhook_events")
+}
+
+model Refund {
+  id               Int      @id @default(autoincrement())
+  paymentId        Int
+  amountCents      Int
+  reason           String?  @db.VarChar(255)
+  externalRefundId String?  @db.VarChar(128)
+  status           String   @db.VarChar(16) // PENDING | DONE | FAILED
+  createdById      Int?
+  createdAt        DateTime @default(now())
+
+  Payment   Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  CreatedBy User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([paymentId])
+  @@index([createdById])
+  @@map("refunds")
+}
+
+/// Configuração dos gateways externos (credenciais criptografadas com ENCRYPTION_KEY)
+model GatewayConfig {
+  gateway        String   @id @db.VarChar(32)
+  enabled        Boolean  @default(false)
+  sandbox        Boolean  @default(true)
+  credentialsEnc Bytes?   @db.Blob
+  /// métodos que este gateway atende (PaymentMethod[])
+  methods        Json?
+  /// menor = preferido quando mais de um gateway atende o mesmo método
+  priority       Int      @default(100)
+  updatedById    Int?
+  updatedAt      DateTime @updatedAt
+
+  @@map("gateway_configs")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// TIME / CONTEÚDO
+// ═════════════════════════════════════════════════════════════════════════════
+
+model Post {
+  id           Int            @id @default(autoincrement())
+  title        String         @db.VarChar(200)
+  body         String         @db.Text
+  imageKeys    Json? // string[]
+  visibility   PostVisibility @default(PUBLIC)
+  minTierLevel Int?
+  pinned       Boolean        @default(false)
+  publishedAt  DateTime?
+  authorId     Int
+  eventId      Int?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  deletedAt    DateTime?
+
+  Author User   @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  Event  Event? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  @@index([authorId])
+  @@index([eventId])
+  @@index([publishedAt])
+  @@map("posts")
+}
+
+model Player {
+  id        Int            @id @default(autoincrement())
+  name      String         @db.VarChar(160)
+  nickname  String?        @db.VarChar(60)
+  number    Int?
+  position  PlayerPosition @default(MF)
+  photoKey  String?        @db.VarChar(255)
+  birthDate DateTime?      @db.Date
+  bio       String?        @db.Text
+  active    Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  LineupEntries LineupEntry[]
+
+  @@map("players")
+}
+
+model Lineup {
+  id          Int       @id @default(autoincrement())
+  eventId     Int       @unique
+  formation   String?   @db.VarChar(16) // futsal: ex. 3-1, 2-2, 4-0 (goleiro + 4 na linha)
+  notes       String?   @db.Text
+  publishedAt DateTime?
+  createdById Int?
+  updatedAt   DateTime  @updatedAt
+
+  Event   Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  Entries LineupEntry[]
+
+  @@map("lineups")
+}
+
+model LineupEntry {
+  id        Int     @id @default(autoincrement())
+  lineupId  Int
+  playerId  Int
+  starter   Boolean @default(true)
+  slot      String? @db.VarChar(16) // posição na formação (futsal: GOL, FIXO, ALA-D, ALA-E, PIVÔ)
+  isCaptain Boolean @default(false)
+  sortOrder Int     @default(0)
+
+  Lineup Lineup @relation(fields: [lineupId], references: [id], onDelete: Cascade)
+  Player Player @relation(fields: [playerId], references: [id], onDelete: Restrict)
+
+  @@unique([lineupId, playerId])
+  @@index([playerId])
+  @@map("lineup_entries")
+}

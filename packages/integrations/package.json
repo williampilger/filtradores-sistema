@@ -1,0 +1,27 @@
+{
+  "name": "@filt/integrations",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./crypto": "./src/crypto.ts",
+    "./storage": "./src/storage.ts",
+    "./mailer": "./src/mailer.ts",
+    "./images": "./src/images.ts",
+    "./payments": "./src/payments.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "@filt/db": "*",
+    "@filt/shared": "*",
+    "nodemailer": "^7.0.0",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/nodemailer": "^7.0.0",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "name": "filtradores-monorepo",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/web & npm run dev --workspace=apps/worker & wait",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:worker": "npm run dev --workspace=apps/worker",
+    "dev:mobile": "npm run start --workspace=apps/mobile",
+    "build": "npm run db:generate && npm run build --workspace=apps/web",
+    "start": "npm run start:web & npm run start:worker & wait",
+    "start:web": "npm run start --workspace=apps/web",
+    "start:worker": "npm run start --workspace=apps/worker",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "eslint apps/web apps/worker packages",
+    "db:up": "docker compose up -d",
+    "db:generate": "npm run generate --workspace=packages/db",
+    "db:migrate": "npm run migrate --workspace=packages/db",
+    "db:migrate:deploy": "npm run migrate:deploy --workspace=packages/db",
+    "db:seed": "npm run seed --workspace=packages/db",
+    "db:seed:demo": "npm run seed:demo --workspace=packages/db",
+    "db:studio": "npm run studio --workspace=packages/db",
+    "deploy:sony": "npm ci && npm run db:up && npm run db:generate && npm run db:migrate:deploy && npm run db:seed && npm run build && PORT=26006 pm2 start npm --name 'filtradores-web' -- run start:web && pm2 start npm --name 'filtradores-worker' --kill-timeout 60000 -- run start:worker && pm2 save",
+    "redeploy:sony": "git pull && npm ci && npm run db:generate && npm run db:migrate:deploy && npm run build && pm2 restart filtradores-web filtradores-worker"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^16.4.2",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^16.5.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.71.2"
+  },
+  "overrides": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
