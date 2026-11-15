@@ -112,3 +112,14 @@ export async function retryWebhookEvents(): Promise<void> {
         }
     }
 }
+
+/** Demonstração: aplica na hora o status dos pagamentos simulados de um pedido (chamado ao consultar o pedido) */
+export async function demoTick(orderId: number): Promise<void> {
+    const { registry } = await getPayments();
+    if (!registry.has('demo')) return;
+    const pend = await prisma.payment.findMany({ where: { orderId, gateway: 'demo', status: 'PENDING', externalId: { not: null } } });
+    for (const p of pend) {
+        const r = await registry.get('demo').getCharge(p.externalId!);
+        if (r.status !== 'PENDING') await applyPaymentStatus(p.id, r.status, { paidAt: r.paidAt });
+    }
+}

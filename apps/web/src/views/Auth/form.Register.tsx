@@ -40,14 +40,14 @@ export function Register({ next }: { next?: string }) {
                 toast.success('Conta criada! Enviamos um e-mail para confirmar seu endereço.');
                 router.replace(target);
             }}>
-                <Field label="Nome completo" className="sm:col-span-2"><Input value={f.name} onChange={set('name')} required autoFocus autoComplete="name" className="!h-11 text-base" /></Field>
-                <Field label="E-mail" className="sm:col-span-2"><Input type="email" value={f.email} onChange={set('email')} required autoComplete="email" className="!h-11 text-base" /></Field>
-                <Field label="Senha (mín. 8 caracteres)"><Input type="password" value={f.password} onChange={set('password')} required minLength={8} autoComplete="new-password" className="!h-11 text-base" /></Field>
-                <Field label="Confirmar senha"><Input type="password" value={f.confirm} onChange={set('confirm')} required autoComplete="new-password" className="!h-11 text-base" /></Field>
+                <Field label="Nome completo" className="sm:col-span-2"><Input value={f.name} onChange={set('name')} required autoFocus autoComplete="name" className="!h-11 !text-base" /></Field>
+                <Field label="E-mail" className="sm:col-span-2"><Input type="email" value={f.email} onChange={set('email')} required autoComplete="email" className="!h-11 !text-base" /></Field>
+                <Field label="Senha (mín. 8 caracteres)"><Input type="password" value={f.password} onChange={set('password')} required minLength={8} autoComplete="new-password" className="!h-11 !text-base" /></Field>
+                <Field label="Confirmar senha"><Input type="password" value={f.confirm} onChange={set('confirm')} required autoComplete="new-password" className="!h-11 !text-base" /></Field>
                 <Field label="CPF (opcional)" hint={f.cpf && !isValidCpf(f.cpf) ? <span className="text-danger">CPF inválido</span> : 'Necessário para comprar e se associar'}>
-                    <Input value={f.cpf} onChange={set('cpf')} onBlur={() => setF(s => ({ ...s, cpf: formatCpf(s.cpf) }))} inputMode="numeric" placeholder="000.000.000-00" className="!h-11 text-base" />
+                    <Input value={f.cpf} onChange={set('cpf')} onBlur={() => setF(s => ({ ...s, cpf: formatCpf(s.cpf) }))} inputMode="numeric" placeholder="000.000.000-00" className="!h-11 !text-base" />
                 </Field>
-                <Field label="Celular (opcional)"><Input type="tel" value={f.phone} onChange={set('phone')} autoComplete="tel" placeholder="(51) 99999-9999" className="!h-11 text-base" /></Field>
+                <Field label="Celular (opcional)"><Input type="tel" value={f.phone} onChange={set('phone')} autoComplete="tel" placeholder="(51) 99999-9999" className="!h-11 !text-base" /></Field>
                 <button className="btn btn-accent btn-lg w-full sm:col-span-2" disabled={busy}>{busy ? 'Criando...' : 'Criar minha conta'}</button>
                 <p className="text-center text-sm sm:col-span-2">
                     Já tem conta? <Link href={`/login${next ? `?next=${encodeURIComponent(target)}` : ''}`} className="font-semibold text-brand hover:underline">Entrar</Link>

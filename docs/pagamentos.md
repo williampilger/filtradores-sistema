@@ -10,6 +10,7 @@ Os gateways ficam no pacote **separado e reaproveitável** [`@williampilger/paym
 | Asaas | PIX, boleto, cartão, checkout | online |
 | `manual` | dinheiro, PIX direto, transferência | portaria/PDV, mensalidade paga em mãos |
 | `courtesy` | cortesia (valor 0) | ingressos cortesia, pedidos gratuitos |
+| `demo` | PIX, cartão, boleto **simulados** | **somente com `DEMO_MODE=true`** (`packages/core/src/demoGateway.ts`) - ver [demonstracao.md](demonstracao.md) |
 
 ## Configuração (Admin > Gateways)
 

@@ -6,7 +6,11 @@
  */
 import Constants from 'expo-constants';
 
-const fromExtra = (Constants.expoConfig?.extra as { apiUrl?: string } | undefined)?.apiUrl;
+const extra = Constants.expoConfig?.extra as { apiUrl?: string, demoMode?: boolean } | undefined;
+const fromExtra = extra?.apiUrl;
+
+/** Ambiente de demonstração (dados fictícios): mostra a faixa no topo das telas */
+export const DEMO_MODE: boolean = extra?.demoMode === true || process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
 
 /** URL base do servidor (sem barra no final). Ex.: http://192.168.0.10:3000 */
 export const API_URL: string = (fromExtra || process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000').replace(/\/+$/, '');

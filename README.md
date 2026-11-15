@@ -51,12 +51,12 @@ npm run db:up                  # Redis (filt-redis :6393)
 npm run db:generate
 npm run db:migrate             # cria as tabelas no mysql-dev
 npm run db:seed                # clube, papéis, master
-npm run db:seed:demo           # (opcional) planos, jogos, produtos, elenco de exemplo
+npm run db:demo:reset          # (opcional) DEMONSTRAÇÃO completa - APAGA o banco (exige DEMO_MODE=true) - ver docs/demonstracao.md
 npm run dev                    # web (http://localhost:3000) + worker
 npm run dev:mobile             # app (Expo) - ver apps/mobile/README.md
 ```
 
-Entre com `MASTER_EMAIL` / `MASTER_PASSWORD` do `.env`. O cadastro do 2FA é pedido no primeiro acesso.
+Entre com `MASTER_EMAIL` / `MASTER_PASSWORD` do `.env` (senha padrão do seed: `Teste53!` - trocar em produção). O cadastro do 2FA é pedido no primeiro acesso.
 
 ## Scripts
 
@@ -86,6 +86,7 @@ Entre com `MASTER_EMAIL` / `MASTER_PASSWORD` do `.env`. O cadastro do 2FA é ped
 | [prisma](docs/prisma.md) | Banco e migrations |
 | [deploy](docs/deploy.md) | Deploy no sony |
 | [mobile](docs/mobile.md) | App iOS/Android |
+| [demonstracao](docs/demonstracao.md) | Ambiente de demonstração: contas, dados e roteiro de apresentação |
 | [ToDo](ToDo.md) | Pendências |
 
 ---

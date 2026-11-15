@@ -34,7 +34,7 @@ export function ForgotPassword() {
                     setBusy(false);
                     if (r.success) setSent(true);
                 }}>
-                    <Field label="E-mail"><Input type="email" value={email} onChange={setEmail} required autoFocus autoComplete="email" className="!h-11 text-base" /></Field>
+                    <Field label="E-mail"><Input type="email" value={email} onChange={setEmail} required autoFocus autoComplete="email" className="!h-11 !text-base" /></Field>
                     <button className="btn btn-primary btn-lg w-full" disabled={busy}>{busy ? 'Enviando...' : 'Enviar link'}</button>
                     <Link href="/login" className="text-center text-sm text-ink-muted hover:underline">Lembrei a senha</Link>
                 </form>
@@ -56,8 +56,8 @@ function NewPasswordForm({ submitLabel, onSubmit }: { submitLabel: string, onSub
             const ok = await onSubmit(password);
             if (!ok) setBusy(false);
         }}>
-            <Field label="Nova senha (mín. 8 caracteres)"><Input type="password" value={password} onChange={setPassword} required minLength={8} autoFocus autoComplete="new-password" className="!h-11 text-base" /></Field>
-            <Field label="Confirmar senha"><Input type="password" value={confirm} onChange={setConfirm} required autoComplete="new-password" className="!h-11 text-base" /></Field>
+            <Field label="Nova senha (mín. 8 caracteres)"><Input type="password" value={password} onChange={setPassword} required minLength={8} autoFocus autoComplete="new-password" className="!h-11 !text-base" /></Field>
+            <Field label="Confirmar senha"><Input type="password" value={confirm} onChange={setConfirm} required autoComplete="new-password" className="!h-11 !text-base" /></Field>
             <button className="btn btn-primary btn-lg w-full" disabled={busy}>{busy ? 'Salvando...' : submitLabel}</button>
         </form>
     );

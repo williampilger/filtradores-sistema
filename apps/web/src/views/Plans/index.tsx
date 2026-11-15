@@ -93,7 +93,7 @@ export default function Plans() {
                                 isCurrent(p) ? (
                                     <Link href="/minha-conta?aba=socio" className="btn btn-lg w-full">Seu plano atual</Link>
                                 ) : (
-                                    <button type="button" className={`btn btn-lg w-full ${i === featuredIdx ? 'btn-accent' : 'btn-primary'}`} disabled={busyId !== null || (hasMembership && !isCurrent(p))} onClick={() => void join(p)}>
+                                    <button type="button" className={`btn btn-lg w-full !whitespace-normal ${i === featuredIdx ? 'btn-accent' : 'btn-primary'}`} disabled={busyId !== null || (hasMembership && !isCurrent(p))} onClick={() => void join(p)}>
                                         {busyId === p.id ? 'Aguarde...' : hasMembership ? 'Fale com a diretoria para trocar' : 'Quero ser sócio'}
                                     </button>
                                 )

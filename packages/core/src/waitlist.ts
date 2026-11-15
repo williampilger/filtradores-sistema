@@ -154,11 +154,11 @@ export async function setBatchStatus(batchId: number, status: ProductionBatchSta
 
     if (status === 'IN_PRODUCTION') {
         await prisma.orderItem.updateMany({ where: { id: { in: paidItems.map(i => i.id) } }, data: { deliveryStatus: 'IN_PRODUCTION' } });
-        for (const u of users) await notifyUser(u, { title: `${b.Product.name}: em produção`, body: 'Sua encomenda entrou em produção. Avisaremos quando estiver pronta para retirada.', link: '/minha-conta/pedidos' });
+        for (const u of users) await notifyUser(u, { title: `${b.Product.name}: em produção`, body: 'Sua encomenda entrou em produção. Avisaremos quando estiver pronta para retirada.', link: '/minha-conta?aba=pedidos' });
     }
     if (status === 'READY') {
         await prisma.orderItem.updateMany({ where: { id: { in: paidItems.map(i => i.id) } }, data: { deliveryStatus: 'READY_FOR_PICKUP' } });
-        for (const u of users) await notifyUser(u, { title: `${b.Product.name}: pronto para retirada`, body: 'Sua encomenda está pronta! Veja as instruções de retirada na sua conta.', link: '/minha-conta/pedidos' });
+        for (const u of users) await notifyUser(u, { title: `${b.Product.name}: pronto para retirada`, body: 'Sua encomenda está pronta! Veja as instruções de retirada na sua conta.', link: '/minha-conta?aba=pedidos' });
         // fila sem pagamento antecipado: chama todos para pagar
         const waiting = await prisma.waitlistEntry.findMany({ where: { batchId, status: 'WAITING' } });
         const deadline = reservationDeadline();
@@ -170,7 +170,7 @@ export async function setBatchStatus(batchId: number, status: ProductionBatchSta
     if (status === 'CANCELED') {
         await prisma.orderItem.updateMany({ where: { id: { in: paidItems.map(i => i.id) } }, data: { deliveryStatus: 'CANCELED' } });
         await prisma.waitlistEntry.updateMany({ where: { batchId, status: { in: ['WAITING', 'NOTIFIED'] } }, data: { status: 'CANCELED' } });
-        for (const u of users) await notifyUser(u, { title: `${b.Product.name}: lote cancelado`, body: 'Infelizmente o lote foi cancelado. O valor pago será estornado pela diretoria.', link: '/minha-conta/pedidos' });
+        for (const u of users) await notifyUser(u, { title: `${b.Product.name}: lote cancelado`, body: 'Infelizmente o lote foi cancelado. O valor pago será estornado pela diretoria.', link: '/minha-conta?aba=pedidos' });
         if (paidItems.length) LogSystem.ERROR(261115170019, `Lote #${batchId} cancelado com ${paidItems.length} encomenda(s) paga(s): ESTORNAR os pagamentos`);
     }
     await audit({ userId: byUserId, action: 'batch.status', entity: 'batch', entityId: batchId, data: { from: b.status, to: status } });

@@ -18,6 +18,7 @@ import { Inter_600SemiBold } from '@expo-google-fonts/inter/600SemiBold';
 import { Inter_700Bold } from '@expo-google-fonts/inter/700Bold';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SessionProvider } from '@/session';
+import { DemoInsets } from '@/components/DemoBanner';
 import { colors, fonts } from '@/theme';
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -34,6 +35,7 @@ function RootStack() {
     return (
         <>
             <StatusBar style="light" />
+            <DemoInsets>
             <Stack
                 screenOptions={{
                     headerStyle: { backgroundColor: colors.header },
@@ -64,6 +66,7 @@ function RootStack() {
                 <Stack.Screen name="gate/[eventId]/panel" options={{ title: 'Painel do evento' }} />
                 <Stack.Screen name="gate/[eventId]/sell" options={{ title: 'Venda na portaria' }} />
             </Stack>
+            </DemoInsets>
         </>
     );
 }

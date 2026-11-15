@@ -25,7 +25,7 @@ export default function StaffScreen() {
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.brand} colors={[colors.brand]} />}
             ListHeaderComponent={<Txt color="inkMuted">Escolha o evento para validar entradas, vender ingressos ou acompanhar o público.</Txt>}
             renderItem={({ item }) => (
-                <Card onPress={() => router.push({ pathname: '/gate/[eventId]', params: { eventId: String(item.id), title: item.title } })}>
+                <Card onPress={() => router.push({ pathname: '/gate/[eventId]', params: { eventId: String(item.id), title: item.title, slug: item.slug } })}>
                     <Row style={{ justifyContent: 'space-between' }}>
                         <Txt size={13} color="brand" weight="semibold">{formatDateTime(item.startsAt)}</Txt>
                         <Badge label={LABELS.eventStatus[item.status]} tone={item.status === 'PUBLISHED' ? 'ok' : 'neutral'} />

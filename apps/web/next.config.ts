@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
     outputFileTracingRoot: repoRoot,
     turbopack: { root: repoRoot },
     allowedDevOrigins: ['sony'],
+    // DEMO_MODE (servidor) controla também a faixa de demonstração no front
+    env: { NEXT_PUBLIC_DEMO_MODE: process.env.DEMO_MODE === 'true' ? 'true' : 'false' },
 };
 
 export default nextConfig;

@@ -8,10 +8,12 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { ClubLogo } from './ClubLogo';
+import { DemoBanner } from './DemoBanner';
 
 export function AuthShell({ title, subtitle, children, wide }: { title: ReactNode, subtitle?: ReactNode, children: ReactNode, wide?: boolean }) {
     return (
         <main className="hero-blue relative flex min-h-dvh flex-col">
+            <DemoBanner />
             <div className="club-stripes h-2" aria-hidden />
             <div className="flex flex-1 flex-col items-center justify-center px-4 py-8">
                 <Link href="/" className="mb-5 flex flex-col items-center gap-2" aria-label="Voltar para o site">

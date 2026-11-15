@@ -100,7 +100,7 @@ export const LABELS = {
     deliveryStatus: { NOT_APPLICABLE: '-', PENDING: 'A separar', IN_PRODUCTION: 'Em produção', READY_FOR_PICKUP: 'Pronto p/ retirada', DELIVERED: 'Entregue', CANCELED: 'Cancelado' },
     paymentMethod: { PIX: 'PIX', CARD: 'Cartão', BOLETO: 'Boleto', CHECKOUT: 'Checkout do gateway', CASH: 'Dinheiro', MANUAL: 'Manual', COURTESY: 'Cortesia' },
     paymentStatus: { PENDING: 'Pendente', AUTHORIZED: 'Autorizado', PAID: 'Pago', FAILED: 'Recusado', CANCELED: 'Cancelado', EXPIRED: 'Expirado', REFUNDED: 'Estornado', PARTIALLY_REFUNDED: 'Estorno parcial', CHARGEBACK: 'Chargeback' },
-    gateway: { stripe: 'Stripe', mercadopago: 'Mercado Pago', pagseguro: 'PagSeguro (PagBank)', asaas: 'Asaas', manual: 'Manual', courtesy: 'Cortesia' },
+    gateway: { stripe: 'Stripe', mercadopago: 'Mercado Pago', pagseguro: 'PagSeguro (PagBank)', asaas: 'Asaas', manual: 'Manual', courtesy: 'Cortesia', demo: 'Demonstração (simulado)' } as Record<string, string>,
     fulfillment: { STOCK: 'Pronta entrega (estoque)', ON_DEMAND: 'Sob encomenda' },
     waitlistPayment: { UPFRONT: 'Paga ao entrar na lista', ON_RELEASE: 'Paga quando ficar pronto' },
     waitlistStatus: { WAITING: 'Na fila', NOTIFIED: 'Chamado (aguardando compra)', CONVERTED: 'Comprou', EXPIRED: 'Expirou', CANCELED: 'Cancelado' },

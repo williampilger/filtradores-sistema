@@ -6,13 +6,13 @@
  */
 import { prisma } from '@filt/db';
 import { eventCounters, NotFoundError, toTicketTypeDTO } from '@filt/core';
-import { assertEventAccess, can, route } from '@/lib/authenticate';
+import { can, canOnEvent, route } from '@/lib/authenticate';
 import { idParam } from '@/lib/http';
 
 export const GET = route<{ id: string }>({ perm: ['checkin.validate', 'events.read', 'tickets.sell_manual'] }, async ({ params, auth }) => {
     const id = idParam(params.id);
-    if (!can(auth, 'events.read')) assertEventAccess(auth, id, 'checkin.validate');
-    else assertEventAccess(auth, id, 'events.read');
+    // qualquer uma das permissões de evento (portaria, organização ou venda), respeitando a restrição por EventStaff
+    if (!(['events.read', 'checkin.validate', 'tickets.sell_manual'] as const).some(p => canOnEvent(auth, id, p))) throw new NotFoundError('Evento não encontrado', 261115270003);
     const e = await prisma.event.findUnique({ where: { id }, include: { TicketTypes: { orderBy: { sortOrder: 'asc' } } } });
     if (!e || e.deletedAt) throw new NotFoundError('Evento não encontrado', 261115270001);
     const [counters, byOrigin, byResult] = await Promise.all([

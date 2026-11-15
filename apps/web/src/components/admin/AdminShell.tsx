@@ -16,6 +16,7 @@ import {
 } from 'react-icons/md';
 import type { Permission } from '@filt/shared';
 import { Spinner } from '@/components/ui';
+import DemoBanner from '@/components/site/DemoBanner';
 import { useSession } from '@/hooks/useSession';
 
 type NavItem = { href: string, label: string, icon: IconType, perms?: Permission[] };
@@ -150,15 +151,19 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
     return (
         <div className="flex min-h-screen flex-col">
-            <header className="sticky top-0 z-30 flex h-header shrink-0 items-center gap-2 bg-header px-2 text-header-ink shadow md:px-4">
-                <button className="btn btn-ghost btn-sm text-header-ink md:hidden" onClick={() => setDrawer(true)} aria-label="Abrir menu"><MdMenu size={20} /></button>
-                <Link href="/admin" className="flex items-baseline gap-2">
-                    <span className="display text-2xl text-header-ink">AC<span className="text-club-gold">EF</span></span>
-                    <span className="hidden items-center gap-1 text-xs text-sidebar-ink sm:flex"><MdAdminPanelSettings /> Painel administrativo</span>
-                </Link>
-                <div className="flex-1" />
-                <UserMenu name={session.user.name} email={session.user.email} onLogout={() => void logout()} />
-            </header>
+            {/* faixa de demonstração + barra superior fixas juntas (evita sobreposição de dois "sticky top-0") */}
+            <div className="sticky top-0 z-30 shrink-0">
+                {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && <DemoBanner />}
+                <header className="flex h-header items-center gap-2 bg-header px-2 text-header-ink shadow md:px-4">
+                    <button className="btn btn-ghost btn-sm text-header-ink md:hidden" onClick={() => setDrawer(true)} aria-label="Abrir menu"><MdMenu size={20} /></button>
+                    <Link href="/admin" className="flex items-baseline gap-2">
+                        <span className="display text-2xl text-header-ink">AC<span className="text-club-gold">EF</span></span>
+                        <span className="hidden items-center gap-1 text-xs text-sidebar-ink sm:flex"><MdAdminPanelSettings /> Painel administrativo</span>
+                    </Link>
+                    <div className="flex-1" />
+                    <UserMenu name={session.user.name} email={session.user.email} onLogout={() => void logout()} />
+                </header>
+            </div>
             <div className="club-stripes h-1 shrink-0" />
 
             <div className="flex min-h-0 flex-1">

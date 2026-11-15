@@ -15,7 +15,8 @@
 | `npm run db:migrate` | `prisma migrate dev` (desenvolvimento; usa o shadow) |
 | `npm run db:migrate:deploy` | Aplica migrations (produção) |
 | `npm run db:seed` | Seed base idempotente: clube, papéis, gateways (desabilitados), master |
-| `npm run db:seed:demo` | Dados de demonstração (planos, jogos no Morangão, produtos, elenco fictício). **Só em dev** |
+| `npm run db:demo:reset` | **Apaga o banco** e popula a demonstração completa (exige `DEMO_MODE=true`) - ver [demonstracao.md](demonstracao.md) |
+| `npm run db:seed:demo` | Popula a demonstração em banco recém-criado (sem pedidos) |
 | `npm run db:studio` | Prisma Studio |
 
 ## Convenções

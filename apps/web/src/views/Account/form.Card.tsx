@@ -7,14 +7,14 @@
  */
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import type { MemberCard as MemberCardDTO, PublicHome } from '@filt/shared';
+import type { MemberCard as MemberCardDTO } from '@filt/shared';
 import API from '@/api';
 import { Spinner } from '@/components/ui';
 import { MemberCard } from '@/components/site/MemberCard';
 import { useSiteData } from '@/components/site/SiteData';
 
 export function CardTab() {
-    const { home } = useSiteData() as { home: PublicHome | null };
+    const { home } = useSiteData();
     const [card, setCard] = useState<MemberCardDTO | null | undefined>(undefined);
 
     useEffect(() => { API.me.card().then(r => setCard(r.success ? r.data : null)); }, []);

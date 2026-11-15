@@ -126,7 +126,7 @@ export function CheckoutBox({ items, lines, title = 'Finalizar compra', note }: 
             ) : (
                 <>
                     <fieldset className="grid gap-3 sm:grid-cols-2">
-                        <legend className="lbl mb-2">Seus dados</legend>
+                        <legend className="lbl !mb-2">Seus dados</legend>
                         <Field label="Nome completo"><Input value={customer.name} onChange={v => setCustomer({ ...customer, name: v })} required autoComplete="name" /></Field>
                         <Field label="E-mail"><Input type="email" value={customer.email} onChange={v => setCustomer({ ...customer, email: v })} required autoComplete="email" /></Field>
                         <Field label="CPF" hint={customer.cpf && !isValidCpf(customer.cpf) ? <span className="text-danger">CPF inválido</span> : undefined}>
@@ -136,7 +136,7 @@ export function CheckoutBox({ items, lines, title = 'Finalizar compra', note }: 
                     </fieldset>
 
                     <fieldset>
-                        <legend className="lbl mb-2">Forma de pagamento</legend>
+                        <legend className="lbl !mb-2">Forma de pagamento</legend>
                         <div className="grid gap-2 sm:grid-cols-2">
                             {methods.map(m => (
                                 <label key={m} className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${method === m ? 'border-brand bg-brand-soft' : 'border-line hover:bg-surface-hover'}`}>

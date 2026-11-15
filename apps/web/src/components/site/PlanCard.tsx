@@ -36,7 +36,8 @@ export function PlanCard({ plan, featured, action }: { plan: PlanDTO, featured?:
             <div className="flex flex-1 flex-col gap-4 p-5">
                 {plan.description && <p className="text-sm text-ink-muted">{plan.description}</p>}
                 <ul className="flex flex-col gap-2 text-sm">
-                    {[...perks, ...plan.benefits].map((b, i) => (
+                    {/* benefícios escritos pela diretoria têm prioridade; sem eles, lista gerada a partir das regras do plano */}
+                    {(plan.benefits.length ? plan.benefits : perks).map((b, i) => (
                         <li key={i} className="flex gap-2"><FaCheck className="mt-0.5 shrink-0 text-ok" /><span>{b}</span></li>
                     ))}
                 </ul>

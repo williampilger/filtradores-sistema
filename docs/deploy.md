@@ -53,6 +53,8 @@ QR_SIGNING_SECRET=<gerar>         # idem
 MASTER_EMAIL=<email do master>
 MASTER_PASSWORD=<senha inicial forte>
 GOOGLE_CHAT_WEBHOOK=<webhook>
+DEMO_MODE=false                   # true só para apresentação (ver docs/demonstracao.md)
+EXPO_PUBLIC_DEMO_MODE=false
 ```
 ⚠️ `ENCRYPTION_KEY` e `QR_SIGNING_SECRET` **nunca** mudam depois de em uso:
 - trocar a `ENCRYPTION_KEY` invalida as credenciais dos gateways e o 2FA;

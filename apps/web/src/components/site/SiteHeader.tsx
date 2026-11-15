@@ -45,7 +45,7 @@ export function SiteHeader() {
     const pending2fa = !!session && (session.mfaPending || session.mfaSetupRequired);
 
     return (
-        <header className="sticky top-0 z-40 bg-brand-deep text-brand-ink shadow-md">
+        <header className="bg-brand-deep text-brand-ink shadow-md">
             <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
                 <button type="button" className="-ml-1 rounded p-2 md:hidden" aria-label="Abrir menu" onClick={() => setMobileOpen(o => !o)}>
                     {mobileOpen ? <FaXmark size={20} /> : <FaBars size={20} />}

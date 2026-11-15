@@ -45,7 +45,7 @@ export default function Account({ tab }: { tab?: string }) {
                 <Container className="flex items-center gap-4 py-8">
                     <Avatar name={session.user.name} photoUrl={session.user.photoUrl} size={72} className="ring-2 ring-club-gold" />
                     <div className="min-w-0">
-                        <div className="text-xs font-bold uppercase tracking-[.25em] text-club-gold">{m && m.status === 'ACTIVE' ? `Sócio ${m.plan.name}` : 'Torcedor'}</div>
+                        <div className="text-xs font-bold uppercase tracking-[.25em] text-club-gold">{m && m.status === 'ACTIVE' ? m.plan.name : 'Torcedor'}</div>
                         <h1 className="display truncate text-4xl">{session.user.name}</h1>
                         <div className="text-sm opacity-80">
                             {m ? <>{m.memberNumber != null && <>Sócio nº {m.memberNumber} · </>}{LABELS.membershipStatus[m.status]}</> : session.user.email}

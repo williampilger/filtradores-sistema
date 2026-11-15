@@ -45,7 +45,6 @@ export type CreateOrderInput = {
     notes?: string | null;
 };
 
-type PricedItem = Prisma.OrderItemCreateWithoutOrderInput & { _reserve?: () => Promise<void> };
 
 async function activeMembershipPlan(tx: Tx, userId: number | null) {
     if (!userId) return null;

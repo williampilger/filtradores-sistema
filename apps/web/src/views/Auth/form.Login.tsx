@@ -40,8 +40,8 @@ export function Login({ next }: { next?: string }) {
                 if (r.data.mfaPending || r.data.mfaSetupRequired) router.replace(`/2fa?next=${encodeURIComponent(target)}`);
                 else router.replace(target);
             }}>
-                <Field label="E-mail"><Input type="email" value={email} onChange={setEmail} required autoFocus autoComplete="email" className="!h-11 text-base" /></Field>
-                <Field label="Senha"><Input type="password" value={password} onChange={setPassword} required autoComplete="current-password" className="!h-11 text-base" /></Field>
+                <Field label="E-mail"><Input type="email" value={email} onChange={setEmail} required autoFocus autoComplete="email" className="!h-11 !text-base" /></Field>
+                <Field label="Senha"><Input type="password" value={password} onChange={setPassword} required autoComplete="current-password" className="!h-11 !text-base" /></Field>
                 <button className="btn btn-primary btn-lg w-full" disabled={busy}>{busy ? 'Entrando...' : 'Entrar'}</button>
                 <div className="flex flex-wrap justify-between gap-2 text-sm">
                     <Link href={`/cadastro${qsNext}`} className="font-semibold text-brand hover:underline">Criar conta</Link>

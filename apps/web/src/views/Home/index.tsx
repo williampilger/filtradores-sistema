@@ -34,7 +34,7 @@ export default function Home() {
                 <Container className="grid items-center gap-8 py-12 sm:py-16 md:grid-cols-[1.4fr_1fr] md:py-20">
                     <div>
                         <div className="mb-3 text-xs font-bold uppercase tracking-[.25em] text-club-gold">{home?.club.name || CLUB_NAME}</div>
-                        <h1 className="display text-7xl leading-[.9] sm:text-8xl lg:text-9xl">
+                        <h1 className="display !leading-[.9] text-7xl sm:text-8xl lg:text-9xl">
                             {isMember ? <>Bem-vindo,<br /><span className="text-club-gold">sócio!</span></> : <>Seja<br /><span className="text-club-gold">sócio</span></>}
                         </h1>
                         <p className="mt-5 max-w-lg text-lg opacity-90">
@@ -44,7 +44,7 @@ export default function Home() {
                             {isMember
                                 ? <Link href="/minha-conta?aba=carteirinha" className="btn btn-accent btn-lg">Minha carteirinha</Link>
                                 : <Link href="/socio" className="btn btn-accent btn-lg">Quero ser sócio <FaArrowRight /></Link>}
-                            <Link href="/jogos" className="btn btn-lg border-surface bg-transparent text-brand-ink hover:text-brand-deep"><FaTicket /> Ingressos</Link>
+                            <Link href="/jogos" className="btn btn-lg !border-surface !bg-transparent text-brand-ink hover:!bg-surface hover:text-brand-deep"><FaTicket /> Ingressos</Link>
                         </div>
                     </div>
                     <div className="hidden justify-center md:flex">

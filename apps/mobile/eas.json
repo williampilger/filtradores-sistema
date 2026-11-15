@@ -1,0 +1,31 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "base": {
+      "node": "22.23.1"
+    },
+    "development": {
+      "extends": "base",
+      "distribution": "internal",
+      "android": { "buildType": "apk" },
+      "env": { "EXPO_PUBLIC_API_URL": "http://sony:26006", "EXPO_PUBLIC_DEMO_MODE": "true" }
+    },
+    "preview": {
+      "extends": "base",
+      "distribution": "internal",
+      "android": { "buildType": "apk" },
+      "env": { "EXPO_PUBLIC_API_URL": "https://filtradores.pilger.dev.br", "EXPO_PUBLIC_DEMO_MODE": "true" }
+    },
+    "production": {
+      "extends": "base",
+      "autoIncrement": true,
+      "env": { "EXPO_PUBLIC_API_URL": "https://filtradores.pilger.dev.br", "EXPO_PUBLIC_DEMO_MODE": "false" }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

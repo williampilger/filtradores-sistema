@@ -111,7 +111,7 @@ export default function Product({ slug }: { slug: string }) {
     } else {
         action = alreadyListed
             ? <button className="btn btn-lg w-full" disabled>Você já está na lista desta opção</button>
-            : <button type="button" className="btn btn-primary btn-lg w-full" disabled={busy} onClick={() => void joinWaitlist()}><FaHourglassHalf /> {busy ? 'Aguarde...' : 'Entrar na lista (pague quando ficar pronto)'}</button>;
+            : <button type="button" className="btn btn-primary btn-lg w-full" disabled={busy} onClick={() => void joinWaitlist()}><FaHourglassHalf /> {busy ? 'Aguarde...' : 'Entrar na lista'}</button>;
     }
 
     const images = p.imageUrls.length ? p.imageUrls : [];

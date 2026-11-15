@@ -11,7 +11,7 @@ import { formatDateTime } from '@filt/shared';
 import API from '@/api';
 import type { AdminProductDetail, AdminVariant, VariantInput } from '@/api/types';
 import { Badge, Card, Checkbox, Empty, Field, Input, Modal, Money, MoneyInput, Select, Spinner } from '@/components/ui';
-import { TableBox, toInt, useBusy, useData } from '@/components/admin/common';
+import { TableBox, toInt, useBusy, useClientPage, useData } from '@/components/admin/common';
 import { useSession } from '@/hooks/useSession';
 
 const REASONS: Record<string, string> = { RESTOCK: 'Entrada', ADJUST: 'Ajuste', SALE: 'Venda', RETURN: 'Devolução/cancelamento', CANCEL: 'Cancelamento' };
@@ -80,13 +80,15 @@ function StockModal({ variant, onClose, onSaved }: { variant: AdminVariant | nul
 
 function MovementsModal({ variant, onClose }: { variant: AdminVariant | null, onClose: () => void }) {
     const { data, loading } = useData(() => API.admin.products.stockMovements(variant!.id), [variant?.id], !!variant);
+    const pg = useClientPage(data, 25);
     return (
         <Modal wide open={!!variant} title={`Movimentações: ${variant?.name ?? ''}`} onClose={onClose}>
             {loading ? <Spinner /> : !data?.length ? <Empty>Nenhuma movimentação.</Empty> : (
+                <>
                 <TableBox>
                     <thead><tr><th>Data</th><th>Tipo</th><th className="num">Qtd.</th><th>Observação</th><th>Usuário</th></tr></thead>
                     <tbody>
-                        {data.map(m => (
+                        {pg.rows.map(m => (
                             <tr key={m.id}>
                                 <td className="whitespace-nowrap">{formatDateTime(m.createdAt)}</td>
                                 <td>{REASONS[m.reason] ?? m.reason}</td>
@@ -97,6 +99,9 @@ function MovementsModal({ variant, onClose }: { variant: AdminVariant | null, on
                         ))}
                     </tbody>
                 </TableBox>
+                {pg.pager}
+                <p className="mt-1 text-xs text-ink-faint">Últimas 200 movimentações.</p>
+                </>
             )}
         </Modal>
     );

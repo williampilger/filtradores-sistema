@@ -32,7 +32,7 @@ export function PaymentPanel({ payment }: { payment: PaymentDTO }) {
                 <div>
                     <span className="lbl">PIX copia e cola</span>
                     <div className="flex gap-2">
-                        <input className="inp font-mono text-xs" readOnly value={payment.pixCopiaECola} onFocus={e => e.currentTarget.select()} aria-label="Código PIX copia e cola" />
+                        <input className="inp font-mono !text-xs" readOnly value={payment.pixCopiaECola} onFocus={e => e.currentTarget.select()} aria-label="Código PIX copia e cola" />
                         <button type="button" className="btn btn-primary shrink-0" onClick={() => void copyText(payment.pixCopiaECola!, 'Código PIX copiado!')}><FaCopy /> Copiar</button>
                     </div>
                 </div>

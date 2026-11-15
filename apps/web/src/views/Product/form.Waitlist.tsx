@@ -30,7 +30,7 @@ export function MyWaitlist({ entries, onBuy, buyingId }: { entries: WaitlistEntr
                             </div>
                             {notified && (
                                 <div className="flex flex-col items-stretch gap-1 sm:items-end">
-                                    <button type="button" className="btn btn-accent" disabled={buyingId === e.id} onClick={() => onBuy(e)}>
+                                    <button type="button" className="btn btn-accent !h-auto !whitespace-normal py-2" disabled={buyingId === e.id} onClick={() => onBuy(e)}>
                                         Comprar agora{e.reservationExpiresAt ? ` (reservado até ${formatDateTime(e.reservationExpiresAt)})` : ''}
                                     </button>
                                     {e.reservationExpiresAt && <span className="text-center text-xs text-ink-muted">Expira em <Countdown until={e.reservationExpiresAt} /></span>}

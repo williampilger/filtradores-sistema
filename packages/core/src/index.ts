@@ -12,6 +12,7 @@ export * from './ids';
 export * from './audit';
 export * from './notify';
 export * from './gateways';
+export * from './demoGateway';
 export * from './inventory';
 export * from './orders';
 export * from './memberships';

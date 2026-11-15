@@ -87,7 +87,7 @@ export function SetupForm({ onDone, email }: { onDone: () => void, email: string
                 </div>
             </details>
             <Field label="Código de 6 dígitos">
-                <Input value={code} onChange={v => setCode(v.replace(/\D/g, '').slice(0, 6))} required inputMode="numeric" autoComplete="one-time-code" pattern="\d{6}" placeholder="000000" className="!h-14 text-center font-mono text-3xl tracking-[.4em]" />
+                <Input value={code} onChange={v => setCode(v.replace(/\D/g, '').slice(0, 6))} required inputMode="numeric" autoComplete="one-time-code" pattern="\d{6}" placeholder="000000" className="!h-14 text-center font-mono !text-3xl tracking-[.4em]" />
             </Field>
             <button className="btn btn-primary btn-lg w-full" disabled={busy || code.length !== 6}>{busy ? 'Ativando...' : 'Ativar verificação em duas etapas'}</button>
         </form>

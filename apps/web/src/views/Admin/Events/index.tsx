@@ -14,7 +14,7 @@ import { formatDateTime, LABELS, type EventStatus } from '@filt/shared';
 import API from '@/api';
 import type { EventInput } from '@/api/types';
 import { Badge, Empty, Modal, PageHeader, Spinner, statusTone } from '@/components/ui';
-import { RequirePerm, TableBox, useBusy, useData } from '@/components/admin/common';
+import { RequirePerm, TableBox, useBusy, useClientPage, useData } from '@/components/admin/common';
 import { useSession } from '@/hooks/useSession';
 import { EMPTY_EVENT, EventFields, eventBody } from '../EventDetail/form.Data';
 
@@ -47,6 +47,7 @@ function EventsInner() {
         const r = await API.staff.events();
         return { ...r, data: (r.data ?? []).map(e => ({ id: e.id, title: e.title, startsAt: e.startsAt, venue: e.venue, status: e.status, capacity: e.counters.capacity, tickets: e.counters.ticketsSold, memberEntries: e.counters.memberEntries, lineupPublished: null })) };
     }, [past, adminList]);
+    const pg = useClientPage(data, 50);
 
     return (
         <div>
@@ -65,7 +66,7 @@ function EventsInner() {
                 <TableBox>
                     <thead><tr><th>Evento</th><th>Data</th><th>Local</th><th>Situação</th><th className="num">Ingressos</th><th className="num">Entradas de sócios</th>{adminList && <th>Escalação</th>}</tr></thead>
                     <tbody>
-                        {data.map(e => (
+                        {pg.rows.map(e => (
                             <tr key={e.id}>
                                 <td><Link href={`/admin/eventos/${e.id}`} className="font-medium text-brand hover:underline">{e.title}</Link></td>
                                 <td className="whitespace-nowrap">{formatDateTime(e.startsAt)}</td>
@@ -79,6 +80,7 @@ function EventsInner() {
                     </tbody>
                 </TableBox>
             )}
+            {!!data?.length && pg.pager}
             {can('events.write') && <CreateEventModal open={creating} onClose={() => setCreating(false)} />}
         </div>
     );

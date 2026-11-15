@@ -4,9 +4,13 @@ Legenda: `[X]` feito · `[ ]` pendente · ⚠️ prioridade
 
 ## ⚠️ Antes de usar com o público
 
+- [ ] ⚠️ **Desligar a demonstração**: `DEMO_MODE=false`, recriar o banco sem dados de exemplo e trocar a senha padrão (`Teste53!`) do master
+
 - [ ] ⚠️ **Credenciais de sandbox** dos 4 gateways (Stripe, Mercado Pago, PagSeguro, Asaas) para validar ponta a ponta: `npm run sandbox:<gateway>` no repo `payment-gateways` + compra real no site/app com webhook chegando (ver `../payment-gateways/ToDo.md`, que lista os pontos da API ainda não confirmados, principalmente do PagBank)
 - [ ] ⚠️ Escolher **qual gateway atende cada método** (prioridade) e virar para produção (`sandbox` desligado)
-- [ ] ⚠️ Publicar o repo `payment-gateways` no GitHub e trocar a dependência `file:` por `github:williampilger/payment-gateways#v0.1.0` (o CI depende disso)
+- [X] Repo `payment-gateways` criado no GitHub (privado): https://github.com/williampilger/payment-gateways
+- [ ] ⚠️ Criar o secret `PAYMENT_GATEWAYS_TOKEN` neste repo (PAT fine-grained, *Contents: read* no `payment-gateways`) - sem ele o CI não baixa a dependência
+- [ ] Versionar o `payment-gateways` (tags semver) e trocar a dependência `file:` por `github:williampilger/payment-gateways#v0.1.0`
 - [ ] ⚠️ **Escudo oficial** em vetor (SVG/PDF) + confirmação de cores e fonte com a diretoria (`docs/identidade-visual.md` > Pendências). Gerar favicon, ícone do app e splash
 - [ ] ⚠️ **SMTP** (Postfix no sony ou provedor transacional): hoje os e-mails (convite, reset de senha, confirmação, avisos) são apenas logados pelo worker
 - [ ] ⚠️ Deploy no sony (`docs/deploy.md`): banco no `mysql-dev` do sony, nginx, túnel, `BACKUP_APPS`
@@ -14,6 +18,9 @@ Legenda: `[X]` feito · `[ ]` pendente · ⚠️ prioridade
 - [ ] ⚠️ Termos de uso e política de privacidade (LGPD) - texto em Configurações + aceite no cadastro
 
 ## Base / infraestrutura
+
+- [X] Ambiente de demonstração (`npm run db:demo:reset`): dados fictícios de todos os fluxos, imagens ilustrativas com marca d'água, gateway simulado - `docs/demonstracao.md`
+- [ ] Campeonato como cadastro próprio (tabela/classificação automática) - hoje é texto no evento + post com a arte da classificação
 
 - [X] Monorepo (npm workspaces) nos padrões dos projetos recentes
 - [X] `.env` único na raiz + `.env.sample`

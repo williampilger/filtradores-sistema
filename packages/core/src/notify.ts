@@ -15,6 +15,7 @@ export type MailJob = { to: string, subject: string, text: string, html?: string
 
 /** Enfileira e-mail (o worker envia; sem SMTP apenas loga) */
 export async function enqueueMail(job: MailJob): Promise<void> {
+    if (process.env.DEMO_SEED_RUNNING === 'true') return; // seed de demonstração: não gera centenas de e-mails
     try {
         await getQueue('mail').add('send', job, { attempts: 5, backoff: { type: 'exponential', delay: 30_000 }, removeOnComplete: 1000, removeOnFail: 1000 });
     } catch (e) {

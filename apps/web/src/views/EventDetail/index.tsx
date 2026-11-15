@@ -94,7 +94,7 @@ export default function EventDetail({ slug }: { slug: string }) {
                 <div className="club-stripes h-2" aria-hidden />
             </section>
 
-            <Container className="flex max-w-4xl flex-col gap-6 py-8">
+            <Container className={`flex max-w-4xl flex-col gap-6 pt-8 ${count > 0 ? 'pb-28 sm:pb-8' : 'pb-8'}`}>
                 <MemberBenefit event={ev} isLogged={!!session} onChange={() => void load()} />
 
                 {/* INGRESSOS */}

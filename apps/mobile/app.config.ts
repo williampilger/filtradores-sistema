@@ -13,6 +13,20 @@ import path from 'node:path';
 import { config as loadEnv } from 'dotenv';
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
+// ⚠️ Monorepo: os `overrides` de react na raiz fazem o npm deixar o expo-router em apps/mobile/node_modules
+// (não sobe para a raiz). O gerador de "typed routes" do `expo start` (@expo/router-server, na raiz) faz
+// require('expo-router/...') e quebraria. Incluímos o node_modules do app nos caminhos globais do Node
+// (vale só para o processo do Expo CLI; o bundle do Metro não é afetado).
+{
+    const local = path.resolve(__dirname, 'node_modules');
+    const paths = (process.env.NODE_PATH ?? '').split(path.delimiter).filter(Boolean);
+    if (!paths.includes(local)) {
+        process.env.NODE_PATH = [local, ...paths].join(path.delimiter);
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        (require('node:module') as { Module: { _initPaths: () => void } }).Module._initPaths();
+    }
+}
+
 // .env da raiz (não sobrescreve variáveis já definidas - ex.: env do EAS Build)
 loadEnv({ path: path.resolve(__dirname, '../../.env'), quiet: true });
 
@@ -66,6 +80,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     experiments: { typedRoutes: true },
     extra: {
         apiUrl,
+        // faixa "AMBIENTE DE DEMONSTRAÇÃO" no topo de todas as telas (EXPO_PUBLIC_DEMO_MODE=true no .env da raiz)
+        demoMode: process.env.EXPO_PUBLIC_DEMO_MODE === 'true',
         // eas: { projectId: '<preencher após `eas init`>' },
     },
 });

@@ -13,7 +13,7 @@ import { formatDate, formatDateTime, LABELS, type ProductionBatchStatus } from '
 import API from '@/api';
 import type { AdminBatch, AdminProductDetail } from '@/api/types';
 import { Badge, Card, confirmAction, DateTimeInput, Empty, Field, Input, Modal, Spinner, statusTone, TextArea } from '@/components/ui';
-import { TableBox, toInt, useBusy, useData } from '@/components/admin/common';
+import { TableBox, toInt, useBusy, useClientPage, useData } from '@/components/admin/common';
 import { useSession } from '@/hooks/useSession';
 
 /** Espelha o BATCH_FLOW do servidor (packages/core/src/waitlist.ts) */
@@ -61,6 +61,8 @@ function BatchModal({ batch, onClose, onChanged }: { batch: AdminBatch | null, o
     const { can } = useSession();
     const { data: b, loading, reload } = useData(() => API.admin.products.batch(batch!.id), [batch?.id], !!batch);
     const { busy, run } = useBusy();
+    const ordersPg = useClientPage(b?.orders, 25);
+    const waitPg = useClientPage(b?.waitlist, 25);
     const go = async (to: ProductionBatchStatus, text: string) => {
         if (!b || !confirmAction(text)) return;
         const r = await run(to, () => API.admin.products.setBatchStatus(b.id, to));
@@ -106,7 +108,7 @@ function BatchModal({ batch, onClose, onChanged }: { batch: AdminBatch | null, o
                             <TableBox>
                                 <thead><tr><th>Pedido</th><th>Cliente</th><th>Variação</th><th className="num">Qtd.</th><th>Pedido</th><th>Entrega</th></tr></thead>
                                 <tbody>
-                                    {b.orders.map(o => (
+                                    {ordersPg.rows.map(o => (
                                         <tr key={o.itemId}>
                                             <td className="font-mono">{can('orders.read') ? <Link href={`/admin/pedidos?q=${o.orderCode}`} className="text-brand hover:underline">{o.orderCode}</Link> : o.orderCode}</td>
                                             <td>{o.customer}{o.phone && <div className="text-xs text-ink-muted">{o.phone}</div>}</td>
@@ -119,6 +121,7 @@ function BatchModal({ batch, onClose, onChanged }: { batch: AdminBatch | null, o
                                 </tbody>
                             </TableBox>
                         )}
+                        {b.orders.length > 0 && ordersPg.pager}
                     </div>
 
                     <div>
@@ -127,7 +130,7 @@ function BatchModal({ batch, onClose, onChanged }: { batch: AdminBatch | null, o
                             <TableBox>
                                 <thead><tr><th>Nome</th><th>Contato</th><th>Variação</th><th className="num">Qtd.</th><th>Situação</th><th>Desde</th></tr></thead>
                                 <tbody>
-                                    {b.waitlist.map(w => (
+                                    {waitPg.rows.map(w => (
                                         <tr key={w.id}>
                                             <td>{w.name}</td>
                                             <td className="text-xs text-ink-muted">{w.email}{w.phone && <><br />{w.phone}</>}</td>
@@ -140,6 +143,7 @@ function BatchModal({ batch, onClose, onChanged }: { batch: AdminBatch | null, o
                                 </tbody>
                             </TableBox>
                         )}
+                        {b.waitlist.length > 0 && waitPg.pager}
                     </div>
                 </div>
             )}

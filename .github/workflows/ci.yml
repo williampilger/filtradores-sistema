@@ -38,11 +38,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: filtradores-sistema
-      # dependência `file:../payment-gateways` (até virar pacote versionado - ver ToDo.md)
+      # dependência `file:../payment-gateways` (repo PRIVADO): exige o secret PAYMENT_GATEWAYS_TOKEN
+      # (fine-grained PAT com "Contents: read" no repo williampilger/payment-gateways) - ver ToDo.md
       - uses: actions/checkout@v4
         with:
           repository: williampilger/payment-gateways
           path: payment-gateways
+          token: ${{ secrets.PAYMENT_GATEWAYS_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22

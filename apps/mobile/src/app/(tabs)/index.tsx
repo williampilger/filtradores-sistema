@@ -95,7 +95,7 @@ export default function HomeScreen() {
                 </View>
             }
             ListEmptyComponent={<Empty icon="newspaper-outline" text="Nenhuma publicação ainda." />}
-            ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.brand} style={{ margin: spacing.lg }} /> : null}
+            ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.brand} style={{ margin: spacing.lg }} /> : undefined}
         />
     );
 }

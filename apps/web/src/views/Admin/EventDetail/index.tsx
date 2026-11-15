@@ -53,7 +53,7 @@ function EventDetailInner({ id }: { id: number }) {
     if (loading) return <Spinner />;
 
     const ev = admin.data;
-    const head: { title: string, slug: string, startsAt: string, venue: string | null, status: EventStatus, counters: EventCounters } | null =
+    const head: { title: string, slug: string, startsAt: string, venue?: string | null, status: EventStatus, counters: EventCounters } | null =
         ev ?? (staff.data ? { ...staff.data } : null);
     if (!head) return <Empty>Evento não encontrado.</Empty>;
     const c = head.counters;
@@ -71,7 +71,7 @@ function EventDetailInner({ id }: { id: number }) {
                 </span>}
                 actions={<>
                     <Link href="/admin/eventos" className="btn">‹ Eventos</Link>
-                    {head.status === 'PUBLISHED' && <Link href={`/eventos/${head.slug}`} className="btn" target="_blank">Ver no site</Link>}
+                    {head.status === 'PUBLISHED' && <Link href={`/jogos/${head.slug}`} className="btn" target="_blank">Ver no site</Link>}
                 </>} />
 
             <Tabs tabs={tabs} value={current ?? 'dados'} onChange={setTab} />

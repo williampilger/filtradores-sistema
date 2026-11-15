@@ -5,10 +5,10 @@
  *
  * 2026.11.15 - Utilitários do painel administrativo (carga de dados, ações com "ocupado", guarda de permissão, copiar)
  */
-import { useCallback, useEffect, useRef, useState, type DependencyList, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type DependencyList, type ReactNode } from 'react';
 import { toast } from 'react-toastify';
 import type { Permission } from '@filt/shared';
-import { Empty } from '@/components/ui';
+import { Empty, Pagination } from '@/components/ui';
 import { useSession } from '@/hooks/useSession';
 
 type Res<T> = { success: boolean, data: T };
@@ -50,6 +50,22 @@ export function useBusy() {
         try { return await fn(); } finally { setBusy(null); }
     }, []);
     return { busy, run };
+}
+
+/**
+ * Paginação no cliente para listas que a API devolve inteiras (ou com limite alto: eventos, produtos, feed, lista de espera...).
+ * Volta para a página 1 quando a página atual deixa de existir (filtro/recarga).
+ */
+export function useClientPage<T>(rows: T[] | null | undefined, pageSize = 50) {
+    const [page, setPage] = useState(1);
+    const total = rows?.length ?? 0;
+    const pages = Math.max(1, Math.ceil(total / pageSize));
+    const current = Math.min(page, pages);
+    const slice = useMemo(() => (rows ?? []).slice((current - 1) * pageSize, current * pageSize), [rows, current, pageSize]);
+    const pager = <Pagination page={current} pageSize={pageSize} total={total} onPage={setPage} />;
+    /** posição absoluta do 1º item da página (para numerar filas) */
+    const offset = (current - 1) * pageSize;
+    return { rows: slice, page: current, setPage, total, pager, offset };
 }
 
 export function NoAccess() {

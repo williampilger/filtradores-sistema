@@ -12,6 +12,7 @@ import { prisma } from '@filt/db';
 import { decryptString, encrypt } from '@filt/integrations/crypto';
 import { EXTERNAL_GATEWAYS, GATEWAY_METHODS, type GatewayId, type PaymentMethod } from '@filt/shared';
 import { createGateway, createPaymentRegistry, type PaymentGateway, type PaymentRegistry } from '@williampilger/payment-gateways';
+import { createDemoGateway, isDemoMode } from './demoGateway';
 import { InputError } from './errors';
 import { LogSystem } from './log';
 
@@ -61,6 +62,7 @@ export async function getPayments(): Promise<{ registry: PaymentRegistry, config
     if (cached && Date.now() - cached.at < 60_000) return cached;
     const configs = await loadConfigs();
     const gateways: PaymentGateway[] = [createGateway('manual', {}), createGateway('courtesy', {})];
+    if (isDemoMode()) gateways.push(createDemoGateway());
     for (const c of configs) {
         if (!EXTERNAL_GATEWAYS.includes(c.gateway as GatewayId)) continue;
         const g = build(c);
@@ -79,6 +81,8 @@ export async function availablePublicMethods(): Promise<PaymentMethod[]> {
         const caps = registry.get(c.gateway).capabilities.methods;
         for (const m of c.methods) if (caps.includes(m) && ['PIX', 'CARD', 'BOLETO', 'CHECKOUT'].includes(m)) set.add(m);
     }
+    // demonstração: tudo disponível pelo gateway simulado
+    if (isDemoMode()) for (const m of ['PIX', 'CARD', 'BOLETO'] as PaymentMethod[]) set.add(m);
     return [...set];
 }
 
@@ -90,6 +94,7 @@ export async function pickGateway(method: PaymentMethod): Promise<PaymentGateway
     const candidates = configs
         .filter(c => c.enabled && c.methods.includes(method) && registry.has(c.gateway) && registry.get(c.gateway).capabilities.methods.includes(method))
         .sort((a, b) => a.priority - b.priority);
+    if (!candidates.length && isDemoMode() && registry.has('demo')) return registry.get('demo');
     if (!candidates.length) throw new InputError(`Forma de pagamento indisponível no momento (${method})`, 261115110003);
     return registry.get(candidates[0].gateway);
 }

@@ -27,7 +27,8 @@ export const eventBody = (f: EventInput): EventInput => ({
 });
 
 export function EventFields({ f, setF, slugAuto, disabled }: { f: EventInput, setF: (fn: (p: EventInput) => EventInput) => void, slugAuto: boolean, disabled?: boolean }) {
-    const plans = useData(() => API.admin.plans.list(), []);
+    const { can } = useSession();
+    const plans = useData(() => API.admin.plans.list(), [], can('plans.manage', 'members.read', 'events.write'));
     const set = <K extends keyof EventInput>(k: K, v: EventInput[K]) => setF(p => ({ ...p, [k]: v }));
     return (
         <fieldset disabled={disabled} className="grid gap-3 sm:grid-cols-4">

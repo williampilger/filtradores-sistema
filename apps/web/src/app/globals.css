@@ -74,6 +74,8 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+/* Classes de componentes em @layer components: utilitários Tailwind (ex.: w-full, h-12) podem sobrescrevê-las */
+@layer components {
 .num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 
 .inp {
@@ -115,3 +117,6 @@ select.inp { padding-right: 4px; }
 .hero-blue { background: radial-gradient(120% 140% at 85% 0%, var(--color-brand) 0%, var(--color-brand-strong) 55%, var(--color-brand-deep) 100%); color: var(--color-brand-ink); }
 .btn-accent { background: var(--color-club-gold); border-color: var(--color-club-gold); color: var(--color-brand-deep); font-weight: 700; }
 .btn-red { background: var(--color-club-red); border-color: var(--color-club-red); color: var(--color-ink-inverse); font-weight: 600; }
+.btn-accent:hover:not(:disabled) { background: var(--color-club-orange); border-color: var(--color-club-orange); }
+.btn-red:hover:not(:disabled) { background: var(--color-club-red-deep); border-color: var(--color-club-red-deep); }
+}

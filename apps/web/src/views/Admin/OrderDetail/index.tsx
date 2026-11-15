@@ -9,7 +9,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-import { formatCpf, formatDateTime, LABELS, type GatewayId } from '@filt/shared';
+import { formatCpf, formatDateTime, formatMoney, LABELS, type GatewayId } from '@filt/shared';
 import API from '@/api';
 import type { AdminOrderDetail } from '@/api/types';
 import { Badge, Card, confirmAction, Empty, Field, Modal, Money, PageHeader, Select, Spinner, statusTone, TextArea } from '@/components/ui';
@@ -34,7 +34,7 @@ function ManualPaymentModal({ order, open, onClose, onDone }: { order: AdminOrde
     };
     return (
         <Modal open={open} title={`Registrar pagamento do pedido ${order.code}`} onClose={onClose}
-            footer={<><button className="btn" onClick={onClose}>Cancelar</button><button className="btn btn-primary" disabled={!!busy} onClick={() => void submit()}>{busy ? 'Registrando...' : `Registrar ${(order.totalCents / 100).toFixed(2).replace('.', ',')}`}</button></>}>
+            footer={<><button className="btn" onClick={onClose}>Cancelar</button><button className="btn btn-primary" disabled={!!busy} onClick={() => void submit()}>{busy ? 'Registrando...' : `Registrar ${formatMoney(order.totalCents)}`}</button></>}>
             <div className="space-y-3">
                 <p className="text-sm">Valor: <b><Money cents={order.totalCents} /></b>. O pedido será marcado como pago e os itens liberados (ingressos emitidos, estoque baixado).</p>
                 <Field label="Forma"><Select value={method} onChange={setMethod} options={[{ value: 'CASH', label: 'Dinheiro' }, { value: 'MANUAL', label: 'Manual (transferência, PIX direto etc.)' }]} /></Field>

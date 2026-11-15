@@ -148,7 +148,7 @@ export async function billingSweep(now = new Date()): Promise<{ charges: number,
             await notifyUser(m.userId, {
                 title: 'Renovação do seu plano de sócio',
                 body: `Sua mensalidade do plano ${m.Plan.name} vence em ${formatDate(m.currentPeriodEnd)}. Pague pelo app ou pelo site para continuar com seus benefícios.`,
-                link: '/minha-conta/socio',
+                link: '/minha-conta?aba=socio',
             });
         }
         // 3. status por datas
@@ -156,7 +156,7 @@ export async function billingSweep(now = new Date()): Promise<{ charges: number,
         if (next !== m.status) {
             await prisma.membership.update({ where: { id: m.id }, data: { status: next } });
             statusChanges++;
-            await notifyUser(m.userId, { title: `Sócio: ${LABELS.membershipStatus[next]}`, body: next === 'OVERDUE' ? 'Sua mensalidade está atrasada. Regularize para voltar a entrar nos jogos.' : 'Seu vínculo de sócio expirou. Associe-se novamente quando quiser!', link: '/minha-conta/socio' });
+            await notifyUser(m.userId, { title: `Sócio: ${LABELS.membershipStatus[next]}`, body: next === 'OVERDUE' ? 'Sua mensalidade está atrasada. Regularize para voltar a entrar nos jogos.' : 'Seu vínculo de sócio expirou. Associe-se novamente quando quiser!', link: '/minha-conta?aba=socio' });
         }
     }
 

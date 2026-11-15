@@ -7,13 +7,13 @@
  */
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { LABELS } from '@filt/shared';
 import API from '@/api';
 import type { ProductInput } from '@/api/types';
-import { Badge, Empty, Field, Input, Modal, Money, PageHeader, Spinner } from '@/components/ui';
-import { RequirePerm, TableBox, Thumb, useBusy, useData } from '@/components/admin/common';
+import { Badge, Checkbox, Empty, Field, Input, Modal, Money, PageHeader, Spinner } from '@/components/ui';
+import { FilterBar, RequirePerm, TableBox, Thumb, useBusy, useClientPage, useData } from '@/components/admin/common';
 import { useSession } from '@/hooks/useSession';
 import { EMPTY_PRODUCT, ProductFields, productBody } from '../ProductDetail/form.Data';
 
@@ -44,16 +44,26 @@ function ProductsInner() {
     const { can } = useSession();
     const { data, loading } = useData(() => API.admin.products.list(), []);
     const [creating, setCreating] = useState(false);
+    const [q, setQ] = useState('');
+    const [inactive, setInactive] = useState(true);
+    const term = q.trim().toLowerCase();
+    const filtered = useMemo(() => (data ?? []).filter(p => (inactive || p.active) && (!term || p.name.toLowerCase().includes(term) || (p.category ?? '').toLowerCase().includes(term))), [data, term, inactive]);
+    const pg = useClientPage(filtered, 50);
 
     return (
         <div>
             <PageHeader title="Produtos" subtitle="Loja do clube: estoque, encomendas e listas de espera"
                 actions={can('products.write') && <button className="btn btn-primary" onClick={() => setCreating(true)}>+ Novo produto</button>} />
-            {loading && !data ? <Spinner /> : !data?.length ? <Empty>Nenhum produto cadastrado.</Empty> : (
+            <FilterBar>
+                <Input value={q} onChange={setQ} placeholder="Filtrar por nome ou categoria" className="!w-72" />
+                <div className="flex h-[34px] items-center"><Checkbox checked={inactive} onChange={setInactive} label="Mostrar inativos" /></div>
+            </FilterBar>
+            {loading && !data ? <Spinner /> : !filtered.length ? <Empty>{data?.length ? 'Nenhum produto encontrado.' : 'Nenhum produto cadastrado.'}</Empty> : (
+                <>
                 <TableBox>
                     <thead><tr><th>Produto</th><th>Categoria</th><th>Modo</th><th className="num">A partir de</th><th className="num">Estoque</th><th className="num">Reservado</th><th className="num">Disponível</th><th className="num">Lista de espera</th><th>Situação</th></tr></thead>
                     <tbody>
-                        {data.map(p => (
+                        {pg.rows.map(p => (
                             <tr key={p.id}>
                                 <td>
                                     <Link href={`/admin/produtos/${p.id}`} className="flex items-center gap-2 font-medium text-brand hover:underline">
@@ -77,6 +87,8 @@ function ProductsInner() {
                         ))}
                     </tbody>
                 </TableBox>
+                {pg.pager}
+                </>
             )}
             {can('products.write') && <CreateProductModal open={creating} onClose={() => setCreating(false)} />}
         </div>

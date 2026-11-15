@@ -14,10 +14,23 @@ import { TableBox, useData } from '@/components/admin/common';
 import { useSession } from '@/hooks/useSession';
 
 export default function Dashboard() {
-    const { session } = useSession();
-    const { data, loading } = useData(() => API.admin.dashboard(), []);
+    const { session, can } = useSession();
+    // a rota do painel exige UMA destas permissões (ex.: quem só valida entradas não tem resumo)
+    const allowed = can('members.read', 'events.read', 'orders.read', 'payments.read', 'reports.finance', 'users.read', 'feed.write', 'lineups.write', 'products.write');
+    const { data, loading } = useData(() => API.admin.dashboard(), [], allowed);
 
     if (loading && !data) return <Spinner />;
+    if (!allowed) {
+        return (
+            <div className="space-y-4">
+                <PageHeader title={<span className="display text-3xl text-brand-deep">Olá, {session?.user.name.split(' ')[0]}</span>} />
+                <Card>
+                    <p className="mb-3 text-sm text-ink-muted">Use o menu para acessar as funções liberadas para o seu perfil.</p>
+                    {can('checkin.validate') && <Link href="/validar" className="btn btn-accent">Abrir leitor de QR (portaria)</Link>}
+                </Card>
+            </div>
+        );
+    }
     const d = data ?? {};
     const revenueTotal = (d.revenueMonth ?? []).reduce((s, r) => s + r.cents, 0);
 

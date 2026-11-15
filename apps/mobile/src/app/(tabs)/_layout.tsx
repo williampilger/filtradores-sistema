@@ -4,12 +4,13 @@
  *
  * 2026.11.15 - Abas principais (a aba "Portaria" só aparece para quem tem permissão de staff)
  */
+import type { ColorValue } from 'react-native';
 import { Tabs } from 'expo-router/js-tabs';
 import { Display, Ionicons, type IconName } from '@/components/ui';
 import { can, isReady, useSession } from '@/session';
 import { colors, fonts } from '@/theme';
 
-const icon = (name: IconName) => ({ color, size }: { color: string, size: number }) => <Ionicons name={name} size={size} color={color} />;
+const icon = (name: IconName) => ({ color, size }: { color: ColorValue, size: number }) => <Ionicons name={name} size={size} color={color as string} />;
 const title = (text: string) => () => <Display size={20} color="headerInk">{text}</Display>;
 
 export default function TabsLayout() {

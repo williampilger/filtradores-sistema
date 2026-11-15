@@ -11,7 +11,7 @@ import { idParam } from '@/lib/http';
 
 export const GET = route<{ id: string }>({ perm: ['checkin.reports', 'checkin.validate'] }, async ({ params, auth }) => {
     const eventId = idParam(params.id);
-    assertEventAccess(auth, eventId, 'checkin.validate');
+    assertEventAccess(auth, eventId, 'checkin.validate', 'checkin.reports'); // quem tem só relatórios também consulta
     const rows = await prisma.checkIn.findMany({
         where: { eventId }, orderBy: { id: 'desc' }, take: 200,
         include: { Ticket: { select: { holderName: true } }, Membership: { select: { User: { select: { name: true } } } }, Operator: { select: { name: true } } },

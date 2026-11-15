@@ -4,11 +4,16 @@
  *
  * 2026.11.15 - Pilha de autenticação (login, cadastro, recuperar senha, 2FA) - aberta como modal
  */
+import { Platform, View } from 'react-native';
 import { Stack } from 'expo-router';
+import { DemoBanner } from '@/components/DemoBanner';
 import { colors, fonts } from '@/theme';
 
 export default function AuthLayout() {
     return (
+        <View style={{ flex: 1 }}>
+        {/* iOS: o modal nativo cobre a faixa do layout raiz */}
+        {Platform.OS === 'ios' ? <DemoBanner /> : null}
         <Stack
             screenOptions={{
                 headerStyle: { backgroundColor: colors.header },
@@ -23,5 +28,6 @@ export default function AuthLayout() {
             <Stack.Screen name="forgot-password" options={{ title: 'Recuperar senha' }} />
             <Stack.Screen name="two-factor" options={{ title: 'Verificação em duas etapas', gestureEnabled: false }} />
         </Stack>
+        </View>
     );
 }

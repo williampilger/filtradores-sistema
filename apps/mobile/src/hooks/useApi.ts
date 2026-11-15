@@ -53,8 +53,10 @@ export function useApi<T>(path: string | null, opts: Opts = {}) {
         return () => clearInterval(t);
     }, [pollMs, path, load]);
 
-    const refresh = useCallback(() => load('refresh'), [load]);
-    const reload = useCallback(() => load('silent'), [load]);
+    /** pull-to-refresh (mostra o indicador) */
+    const refresh = useCallback(() => { void load('refresh'); }, [load]);
+    /** recarga silenciosa */
+    const reload = useCallback(async () => { await load('silent'); }, [load]);
 
     return { data, setData, error, status, loading, refreshing, refresh, reload };
 }

@@ -10,12 +10,13 @@ import { toast } from 'react-toastify';
 import { formatDateTime, LABELS, type WaitlistStatus } from '@filt/shared';
 import API from '@/api';
 import { Badge, Card, confirmAction, Empty, Select, Spinner, statusTone } from '@/components/ui';
-import { optionsOf, TableBox, useBusy, useData } from '@/components/admin/common';
+import { optionsOf, TableBox, useBusy, useClientPage, useData } from '@/components/admin/common';
 
 export default function WaitlistTab({ productId, onChanged }: { productId: number, onChanged: () => void }) {
     const [status, setStatus] = useState<WaitlistStatus | ''>('');
     const { data, loading, reload } = useData(() => API.admin.waitlist.list({ productId, status: status || undefined }), [productId, status]);
     const { busy, run } = useBusy();
+    const pg = useClientPage(data, 50);
 
     const remove = async (id: number, name: string) => {
         if (!confirmAction(`Remover ${name} da lista de espera? A reserva (se houver) é liberada e a pessoa é avisada.`)) return;
@@ -29,12 +30,13 @@ export default function WaitlistTab({ productId, onChanged }: { productId: numbe
                 options={[{ value: '', label: 'Ativos (na fila / chamados)' }, ...optionsOf(LABELS.waitlistStatus)]} />
         }>
             {loading && !data ? <Spinner /> : !data?.length ? <Empty>Ninguém na lista.</Empty> : (
+                <>
                 <TableBox>
                     <thead><tr><th className="num">#</th><th>Nome</th><th>Contato</th><th>Variação</th><th className="num">Qtd.</th><th>Lote</th><th>Situação</th><th>Entrou em</th><th /></tr></thead>
                     <tbody>
-                        {data.map((w, i) => (
+                        {pg.rows.map((w, i) => (
                             <tr key={w.id}>
-                                <td className="num text-ink-muted">{i + 1}</td>
+                                <td className="num text-ink-muted">{pg.offset + i + 1}</td>
                                 <td>{w.name}{w.note && <div className="text-xs text-ink-muted">{w.note}</div>}</td>
                                 <td className="text-xs text-ink-muted">{w.email}{w.phone && <><br />{w.phone}</>}</td>
                                 <td>{w.variant}</td>
@@ -50,6 +52,8 @@ export default function WaitlistTab({ productId, onChanged }: { productId: numbe
                         ))}
                     </tbody>
                 </TableBox>
+                {pg.pager}
+                </>
             )}
         </Card>
     );
