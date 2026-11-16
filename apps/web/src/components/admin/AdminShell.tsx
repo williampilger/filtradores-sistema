@@ -16,6 +16,7 @@ import {
 } from 'react-icons/md';
 import type { Permission } from '@filt/shared';
 import { Spinner } from '@/components/ui';
+import { ClubLogo } from '@/components/site/ClubLogo';
 import DemoBanner from '@/components/site/DemoBanner';
 import { useSession } from '@/hooks/useSession';
 
@@ -156,7 +157,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && <DemoBanner />}
                 <header className="flex h-header items-center gap-2 bg-header px-2 text-header-ink shadow md:px-4">
                     <button className="btn btn-ghost btn-sm text-header-ink md:hidden" onClick={() => setDrawer(true)} aria-label="Abrir menu"><MdMenu size={20} /></button>
-                    <Link href="/admin" className="flex items-baseline gap-2">
+                    <Link href="/admin" className="flex items-center gap-2">
+                        <ClubLogo size="sm" />
                         <span className="display text-2xl text-header-ink">AC<span className="text-club-gold">EF</span></span>
                         <span className="hidden items-center gap-1 text-xs text-sidebar-ink sm:flex"><MdAdminPanelSettings /> Painel administrativo</span>
                     </Link>
@@ -176,7 +178,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                         <div className="absolute inset-0 bg-ink/40" onClick={() => setDrawer(false)} />
                         <aside className="relative h-full w-[260px] max-w-[85vw] overflow-y-auto bg-sidebar text-sidebar-ink shadow-xl">
                             <div className="flex h-header items-center justify-between bg-header px-4">
-                                <span className="display text-xl text-header-ink">AC<span className="text-club-gold">EF</span></span>
+                                <span className="flex items-center gap-2"><ClubLogo size="sm" /><span className="display text-xl text-header-ink">AC<span className="text-club-gold">EF</span></span></span>
                                 <button className="btn btn-ghost btn-sm text-header-ink" onClick={() => setDrawer(false)} aria-label="Fechar menu"><MdClose size={18} /></button>
                             </div>
                             <SideNav pathname={pathname} can={can} />

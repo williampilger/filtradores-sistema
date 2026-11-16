@@ -6,6 +6,16 @@ Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Datas no f
 
 ## 2026-11-16
 
+### Adicionado
+- **Escudo provisório** (imagem raster enviada pela diretoria, fundo recortado para PNG transparente) em todos os
+  lugares onde a marca aparece:
+  - web: fallback do `ClubLogo` (`DEFAULT_LOGO_URL` = `/escudo.png`) quando não há logo em Admin > Configurações
+    (cabeçalho, home, jogos, carteirinha, rodapé, login), cabeçalho do painel admin, prévia em Configurações,
+    favicon (`app/icon.png`) e `apple-icon.png`;
+  - app: `ClubMark` (login, perfil, carteirinha, jogos), ícone, ícone adaptativo do Android e splash.
+  - **Por quê:** deixar o sistema com a cara final antes do vetor oficial; a sigla "ACEF" em texto era só um
+    marcador. Trocar pelo vetor quando chegar (ver `docs/identidade-visual.md`).
+
 ### Alterado
 - **`payment-gateways` agora é submódulo git em `vendor/payment-gateways`**, pacote do workspace npm consumido pelo
   código-fonte (mesmo modelo do CoreCAD na Authenty). Gateways atualizado para `0.2.0`.

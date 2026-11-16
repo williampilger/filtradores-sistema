@@ -26,8 +26,11 @@ Uso no sistema:
 
 - Não redesenhar nem recriar o escudo. Usar **somente o arquivo oficial**:
   - logo do clube: tela **Admin > Configurações** (vai para `ClubSettings.logoKey`);
-  - arquivos estáticos (favicon, ícone do app, splash): `apps/web/public/brand/` e `apps/mobile/assets/`.
-- Enquanto o arquivo oficial não for enviado, as telas mostram a sigla **ACEF** no estilo de título (ver Tipografia).
+  - arquivos estáticos: `apps/web/public/escudo.png`, `apps/web/src/app/icon.png` e `apple-icon.png` (favicon),
+    `apps/mobile/assets/` (`escudo.png`, `icon.png`, `adaptive-icon.png`, `splash-icon.png`).
+- **Hoje (16/11/2026) é um escudo PROVISÓRIO**: imagem raster enviada pela diretoria, com fundo recortado. Vale para
+  todo o sistema enquanto nenhum logo for enviado em Admin > Configurações (`DEFAULT_LOGO_URL` no web,
+  `ClubMark` no app). Login e painel admin usam sempre o arquivo estático.
 - Área de respiro mínima: ¼ da largura do escudo. Sobre fundos azuis, aplicar dentro de um círculo branco, como no avatar do Instagram.
 
 ## Cores
@@ -91,7 +94,8 @@ Próximo da torcida, direto e com energia: "Seu lugar no Filtradores começa aqu
 
 ## Pendências
 
-- [ ] Receber o **vetor oficial do escudo** (SVG/PDF) e colocá-lo em `apps/web/public/brand/` e `apps/mobile/assets/`. Gerar favicon, ícone do app (1024×1024) e splash.
+- [X] Escudo provisório (raster) aplicado no site, painel, favicon, ícone e splash do app.
+- [ ] Receber o **vetor oficial do escudo** (SVG/PDF) e regerar os arquivos listados em [Escudo](#escudo). A versão raster tem a caneca em foto: fica pesada e perde nitidez em tamanhos pequenos.
 - [ ] Confirmar os **códigos de cor** com quem produz as artes.
 - [ ] Confirmar a **fonte** dos títulos das artes. Se for outra condensada (ex.: Bebas Neue, Anton), trocar em `layout.tsx` e no app.
 

@@ -4,9 +4,9 @@
  *
  * 2026.11.15 - Configuração do app Expo (lê o `.env` da raiz do monorepo)
  *
- * TODO(escudo): quando a diretoria enviar o vetor OFICIAL do escudo, gerar em apps/mobile/assets/
- *   icon.png (1024x1024), adaptive-icon.png (foreground 1024x1024) e splash-icon.png, e preencher
- *   `icon`, `android.adaptiveIcon` e a `image` do plugin expo-splash-screen abaixo.
+ * Ícones e splash usam o escudo PROVISÓRIO (raster) em apps/mobile/assets/.
+ * TODO(escudo): quando a diretoria enviar o vetor OFICIAL, regerar icon.png (1024, fundo branco),
+ *   adaptive-icon.png (foreground 1024, escudo em ~60% - zona segura), splash-icon.png e escudo.png.
  *   NÃO redesenhar/recriar o escudo (ver docs/identidade-visual.md).
  */
 import path from 'node:path';
@@ -46,6 +46,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     userInterfaceStyle: 'light',
     primaryColor: colors.brand,
     backgroundColor: colors.app,
+    icon: './assets/icon.png',
     ios: {
         bundleIdentifier: 'br.com.acefiltradores.app',
         supportsTablet: false,
@@ -57,6 +58,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     android: {
         package: 'br.com.acefiltradores.app',
+        adaptiveIcon: { foregroundImage: './assets/adaptive-icon.png', backgroundColor: '#ffffff' },
         permissions: ['android.permission.CAMERA'],
         blockedPermissions: ['android.permission.RECORD_AUDIO'],
     },
@@ -75,7 +77,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             cameraPermission: 'O app usa a câmera para você tirar a foto do seu perfil.',
             microphonePermission: false,
         }],
-        ['expo-splash-screen', { backgroundColor: colors.brand }],
+        ['expo-splash-screen', { backgroundColor: colors.brand, image: './assets/splash-icon.png', imageWidth: 200 }],
     ],
     experiments: { typedRoutes: true },
     extra: {

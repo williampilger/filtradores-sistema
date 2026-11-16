@@ -12,6 +12,8 @@ import {
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 import Svg, { Defs, Polygon, RadialGradient, Rect, Stop } from 'react-native-svg';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Image } from 'expo-image';
+import escudo from '../../assets/escudo.png';
 import { colors, displayText, fonts, radius, spacing, type ColorToken } from '@/theme';
 
 export type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -294,13 +296,13 @@ export function ClubStripes({ height = 10 }: { height?: number }) {
 }
 
 /**
- * Marca do clube. Enquanto o escudo OFICIAL não for enviado, mostra a sigla "ACEF" no estilo de título
- * dentro de um círculo branco (docs/identidade-visual.md). TODO(escudo): trocar pelo arquivo oficial em assets/.
+ * Marca do clube: escudo dentro de um círculo branco (docs/identidade-visual.md).
+ * Escudo PROVISÓRIO em assets/escudo.png - trocar pelo vetor oficial quando a diretoria enviar.
  */
 export function ClubMark({ size = 56 }: { size?: number }) {
     return (
-        <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }}>
-            <Display size={size * 0.3} color="brandDeep">ACEF</Display>
+        <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+            <Image source={escudo} style={{ width: size * 0.86, height: size * 0.86 }} contentFit="contain" accessibilityLabel="Escudo do ACE Filtradores" />
         </View>
     );
 }

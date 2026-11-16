@@ -8,6 +8,8 @@ import { toast } from 'react-toastify';
 import type { EventListItem, OrderStatus } from '@filt/shared';
 
 export const CLUB_SHORT = 'ACEF';
+/** Escudo PROVISÓRIO (apps/web/public/escudo.png): usado enquanto não houver logo enviado em Admin > Configurações */
+export const DEFAULT_LOGO_URL = '/escudo.png';
 export const CLUB_NAME = 'Associação Cultural e Esportiva Filtradores';
 export const CLUB_HOME_VENUE = 'Ginásio do Morangão';
 export const CLUB_CITY = 'Bom Princípio-RS';

@@ -12,6 +12,7 @@ import API from '@/api';
 import type { ClubSettings } from '@/api/types';
 import { Card, Field, FileButton, Input, PageHeader, Spinner, TextArea } from '@/components/ui';
 import { orNull, RequirePerm, useBusy, useData } from '@/components/admin/common';
+import { DEFAULT_LOGO_URL } from '@/components/site/helpers';
 
 type Form = Omit<ClubSettings, 'id' | 'logoKey' | 'logoUrl' | 'updatedAt'>;
 const HEX = /^#[0-9a-fA-F]{6}$/;
@@ -79,10 +80,10 @@ function SettingsInner() {
                 <div className="space-y-4">
                     <Card title="Escudo / logo">
                         <div className="mb-3 flex aspect-square items-center justify-center rounded-lg border border-line bg-surface-alt p-4">
-                            {logo ? <img src={logo} alt="Logo do clube" className="max-h-full max-w-full object-contain" /> : <span className="display text-4xl text-brand">{f.shortName || 'ACEF'}</span>}
+                            <img src={logo || DEFAULT_LOGO_URL} alt="Logo do clube" className="max-h-full max-w-full object-contain" />
                         </div>
                         <FileButton label={busy === 'logo' ? 'Enviando...' : 'Enviar arquivo oficial'} disabled={!!busy} onFile={file => void upload(file)} />
-                        <p className="mt-2 text-xs text-ink-faint">Use somente o arquivo oficial do escudo (PNG com fundo transparente).</p>
+                        <p className="mt-2 text-xs text-ink-faint">Use somente o arquivo oficial do escudo (PNG com fundo transparente).{!logo && ' Sem envio, o site usa o escudo provisório padrão.'}</p>
                     </Card>
                     <Card title="Cores do clube">
                         <div className="space-y-3">

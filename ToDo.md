@@ -12,7 +12,7 @@ Legenda: `[X]` feito · `[ ]` pendente · ⚠️ prioridade
 - [ ] ⚠️ Criar o secret `PAYMENT_GATEWAYS_TOKEN` neste repo (PAT fine-grained, *Contents: read* no `payment-gateways`) - sem ele o CI não baixa o submódulo
 - [X] `payment-gateways` como submódulo + workspace (sem `file:`/build) - ver `CHANGELOG.md`
 - [ ] ⚠️ Garantir acesso SSH do sony ao repo privado `payment-gateways` (deploy key ou chave do usuário)
-- [ ] ⚠️ **Escudo oficial** em vetor (SVG/PDF) + confirmação de cores e fonte com a diretoria (`docs/identidade-visual.md` > Pendências). Gerar favicon, ícone do app e splash
+- [ ] ⚠️ **Escudo oficial** em vetor (SVG/PDF) + confirmação de cores e fonte com a diretoria (`docs/identidade-visual.md` > Pendências). Hoje: escudo provisório (raster) já aplicado em site, favicon, ícone e splash
 - [ ] ⚠️ **SMTP** (Postfix no sony ou provedor transacional): hoje os e-mails (convite, reset de senha, confirmação, avisos) são apenas logados pelo worker
 - [ ] ⚠️ Deploy no sony (`docs/deploy.md`): banco no `mysql-dev` do sony, nginx, túnel, `BACKUP_APPS`
 - [ ] ⚠️ Revisar com a diretoria: planos reais, preços, regras de acesso aos jogos (CLAIM x AUTOMATIC), capacidade do Morangão, textos/termos de uso
