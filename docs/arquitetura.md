@@ -26,7 +26,7 @@
 | `apps/web` | Next.js 16: UI + route handlers |
 | `apps/worker` | BullMQ + node-cron |
 | `apps/mobile` | Expo SDK 58 (iOS/Android) |
-| `../payment-gateways` (repo separado) | `@williampilger/payment-gateways`: Stripe, Mercado Pago, PagSeguro, Asaas, manual, cortesia |
+| `vendor/payment-gateways` (submódulo) | `@williampilger/payment-gateways`: Stripe, Mercado Pago, PagSeguro, Asaas, manual, cortesia |
 
 ## Fluxos principais
 

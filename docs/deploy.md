@@ -10,7 +10,7 @@ Mesmo padrão dos outros apps do sony (ver `~/github/williampilger/infrastructur
 | Banco | container compartilhado `mysql-dev` (3306): `filtradores` + `filtradores-shadow` |
 | Redis | `filt-redis` (`127.0.0.1:6393`, `docker-compose.yml` do repo) |
 | Arquivos enviados | `.storage/` na raiz do repo (incluir no backup) |
-| Repo irmão | `~/github/williampilger/payment-gateways` (dependência `file:` - clonar lado a lado) |
+| Submódulo | `vendor/payment-gateways` (repo privado: o sony precisa de acesso SSH a ele) |
 
 ## 1. Banco no `mysql-dev` (uma vez)
 
@@ -30,9 +30,7 @@ FLUSH PRIVILEGES;
 
 ```bash
 cd ~/github/williampilger
-git clone git@github.com:williampilger/payment-gateways.git      # dependência file: (até virar pacote versionado)
-git clone git@github.com:williampilger/filtradores-sistema.git
-(cd payment-gateways && npm ci && npm run build)
+git clone --recurse-submodules git@github.com:williampilger/filtradores-sistema.git
 cd filtradores-sistema
 cp .env.sample .env && nano .env
 ```
@@ -94,8 +92,7 @@ cloudflared tunnel route dns pilgerdev filtradores.pilger.dev.br
 ## 4. Atualizações
 
 ```bash
-cd ~/github/williampilger/payment-gateways && git pull && npm ci && npm run build   # se o pacote mudou
-cd ~/github/williampilger/filtradores-sistema && npm run redeploy:sony
+cd ~/github/williampilger/filtradores-sistema && npm run redeploy:sony   # já atualiza o submódulo
 ```
 
 ## 5. Backup

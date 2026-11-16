@@ -1,6 +1,6 @@
 # Pagamentos
 
-Os gateways ficam no pacote **separado e reaproveitável** [`@williampilger/payment-gateways`](../../payment-gateways/README.md) (repo `~/github/williampilger/payment-gateways`). A ponte com este sistema está em `packages/core/src/gateways.ts`.
+Os gateways ficam no pacote **separado e reaproveitável** [`@williampilger/payment-gateways`](../vendor/payment-gateways/README.md), submódulo git em `vendor/payment-gateways` consumido pelo código-fonte como pacote do workspace (modelo do CoreCAD). A ponte com este sistema está em `packages/core/src/gateways.ts`.
 
 | Gateway | Métodos | Uso |
 |---|---|---|

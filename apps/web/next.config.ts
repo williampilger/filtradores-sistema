@@ -15,9 +15,9 @@ const nextConfig: NextConfig = {
     poweredByHeader: false,
     agentRules: false, // não gerar AGENTS.md automaticamente
     reactStrictMode: true,
-    transpilePackages: ['@filt/db', '@filt/shared', '@filt/integrations', '@filt/core'],
+    transpilePackages: ['@filt/db', '@filt/shared', '@filt/integrations', '@filt/core', '@williampilger/payment-gateways'],
     // libs nativas / node-only: não empacotar
-    serverExternalPackages: ['@node-rs/argon2', '@prisma/adapter-mariadb', 'mariadb', 'sharp', 'nodemailer', 'bullmq', 'ioredis', 'pino', 'pino-pretty', '@williampilger/payment-gateways'],
+    serverExternalPackages: ['@node-rs/argon2', '@prisma/adapter-mariadb', 'mariadb', 'sharp', 'nodemailer', 'bullmq', 'ioredis', 'pino', 'pino-pretty'],
     outputFileTracingRoot: repoRoot,
     turbopack: { root: repoRoot },
     allowedDevOrigins: ['sony'],

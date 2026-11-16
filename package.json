@@ -4,7 +4,8 @@
   "type": "module",
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "vendor/payment-gateways"
   ],
   "scripts": {
     "dev": "npm run dev --workspace=apps/web & npm run dev --workspace=apps/worker & wait",
@@ -25,8 +26,8 @@
     "db:seed": "npm run seed --workspace=packages/db",
     "db:seed:demo": "npm run demo --workspace=packages/core",
     "db:studio": "npm run studio --workspace=packages/db",
-    "deploy:sony": "npm ci && npm run db:up && npm run db:generate && npm run db:migrate:deploy && npm run db:seed && npm run build && PORT=26006 pm2 start npm --name 'filtradores-web' -- run start:web && pm2 start npm --name 'filtradores-worker' --kill-timeout 60000 -- run start:worker && pm2 save",
-    "redeploy:sony": "git pull && npm ci && npm run db:generate && npm run db:migrate:deploy && npm run build && pm2 restart filtradores-web filtradores-worker",
+    "deploy:sony": "git submodule update --init && npm ci && npm run db:up && npm run db:generate && npm run db:migrate:deploy && npm run db:seed && npm run build && PORT=26006 pm2 start npm --name 'filtradores-web' -- run start:web && pm2 start npm --name 'filtradores-worker' --kill-timeout 60000 -- run start:worker && pm2 save",
+    "redeploy:sony": "git pull --recurse-submodules && git submodule update --init && npm ci && npm run db:generate && npm run db:migrate:deploy && npm run build && pm2 restart filtradores-web filtradores-worker",
     "db:demo:reset": "npm run demo --workspace=packages/core -- --reset"
   },
   "devDependencies": {

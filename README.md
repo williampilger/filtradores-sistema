@@ -6,7 +6,7 @@ Sistema da **Associação Cultural e Esportiva Filtradores**, time de futsal de 
 - **Ingressos**: venda própria, substituindo o Sympla. Lotes, desconto de sócio, cortesias, venda na portaria e resgate de ingresso pelo sócio.
 - **Controle de entrada**: leitor de QR no app ou no navegador, validação atômica e log de todas as leituras.
 - **Loja**: camisas, bonés etc. com estoque, **lista de espera** e itens **sob encomenda** em lotes de produção.
-- **Pagamentos modulares** pelo pacote separado [`payment-gateways`](../payment-gateways): Stripe, Mercado Pago, PagSeguro, Asaas, pagamento manual e cortesia.
+- **Pagamentos modulares** pelo pacote separado [`payment-gateways`](vendor/payment-gateways) (submódulo git): Stripe, Mercado Pago, PagSeguro, Asaas, pagamento manual e cortesia.
 - **Feed do time**: posts públicos, só para sócios, ou a partir de um nível de plano. Também elenco e escalações.
 - **Permissões granulares**: papéis editáveis e overrides por usuário. **2FA obrigatório para o master** e opcional para os demais.
 - **Painel web** de gestão e **app iOS/Android** (Expo) para torcedores, sócios e staff.
@@ -29,6 +29,7 @@ Sistema da **Associação Cultural e Esportiva Filtradores**, time de futsal de 
 apps/web              Next.js: site público, /minha-conta, /admin, /validar, API /api/v1
 apps/worker           Expiração de pedidos, reconciliação de pagamentos, cobrança de sócios, lista de espera, e-mails
 apps/mobile           App Expo (torcedor + Staff)
+vendor/payment-gateways  Submódulo: gateways de pagamento (pacote do workspace, consumido pelo fonte)
 packages/shared       Enums, permissões, DTOs, Zod, QR, regras puras (também usado pelo app)
 packages/db           Prisma: schema, migrations, seeds
 packages/core         Regras de negócio (web + worker)
@@ -41,10 +42,10 @@ docs/                 Documentação
 Pré-requisitos:
 - Node ≥ 22;
 - Docker com o container `mysql-dev` (MySQL 8);
-- o repo `payment-gateways` clonado ao lado deste.
+- acesso ao repo privado `payment-gateways` (submódulo em `vendor/`).
 
 ```bash
-(cd ../payment-gateways && npm ci && npm run build)
+git submodule update --init   # ou clonar com --recurse-submodules
 cp .env.sample .env            # preencher DATABASE_URL, ENCRYPTION_KEY, QR_SIGNING_SECRET... (ver docs/deploy.md)
 npm install
 npm run db:up                  # Redis (filt-redis :6393)
@@ -88,6 +89,7 @@ Entre com `MASTER_EMAIL` / `MASTER_PASSWORD` do `.env` (senha padrão do seed: `
 | [mobile](docs/mobile.md) | App iOS/Android |
 | [demonstracao](docs/demonstracao.md) | Ambiente de demonstração: contas, dados e roteiro de apresentação |
 | [ToDo](ToDo.md) | Pendências |
+| [CHANGELOG](CHANGELOG.md) | O que mudou e por quê |
 
 ---
 

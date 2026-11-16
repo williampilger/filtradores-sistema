@@ -35,35 +35,21 @@ jobs:
       QR_SIGNING_SECRET: ci-qr-secret
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          path: filtradores-sistema
-      # dependência `file:../payment-gateways` (repo PRIVADO): exige o secret PAYMENT_GATEWAYS_TOKEN
+      # payment-gateways é submódulo PRIVADO (vendor/payment-gateways): exige o secret PAYMENT_GATEWAYS_TOKEN
       # (fine-grained PAT com "Contents: read" no repo williampilger/payment-gateways) - ver ToDo.md
       - uses: actions/checkout@v4
         with:
-          repository: williampilger/payment-gateways
-          path: payment-gateways
+          submodules: recursive
           token: ${{ secrets.PAYMENT_GATEWAYS_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: payment-gateways
-        working-directory: payment-gateways
-        run: npm ci && npm run build
       - name: banco de teste
         run: mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS filtradores_test"
-      - working-directory: filtradores-sistema
-        run: npm ci
-      - working-directory: filtradores-sistema
-        run: npm run db:generate
-      - working-directory: filtradores-sistema
-        run: npm run db:migrate:deploy
-      - working-directory: filtradores-sistema
-        run: npm run lint
-      - working-directory: filtradores-sistema
-        run: npm run typecheck
-      - working-directory: filtradores-sistema
-        run: npm test
-      - working-directory: filtradores-sistema
-        run: npm run build
+      - run: npm ci
+      - run: npm run db:generate
+      - run: npm run db:migrate:deploy
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
