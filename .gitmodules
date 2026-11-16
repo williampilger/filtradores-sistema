@@ -1,0 +1,3 @@
+[submodule "vendor/payment-gateways"]
+	path = vendor/payment-gateways
+	url = git@github.com:williampilger/payment-gateways.git
